@@ -1,1 +1,3 @@
-# ABM-form-Fedor-Arsiny-and-Pavel
+# ABM-form-Fedor-Arseniy-and-Pavel 
+
+Данный репзиторий содержит реализацию проекта "Симулятор рыночных торгов".
