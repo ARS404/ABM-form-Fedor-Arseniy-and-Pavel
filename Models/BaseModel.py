@@ -16,6 +16,8 @@ class BaseModel(ap.Model):
         pass
 
     def step(self):
+        ap.Model.step(self)
+
         self.market_env.clean_order_book()
 
         for agent in self.agents:

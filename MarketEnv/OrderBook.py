@@ -1,5 +1,7 @@
 class OrderBook():
     def __init__(self):
-        raise NotImplementedError
+        self.data = list()
+
     def clean(self):
-        raise NotImplementedError
+        self.data = list()
+
