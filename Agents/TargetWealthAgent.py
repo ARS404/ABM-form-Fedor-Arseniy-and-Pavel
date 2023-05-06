@@ -1,4 +1,4 @@
-import BaseAgent
+from Agents.BaseAgent import BaseAgent
 from constants import OperationTypes
 
 
@@ -11,14 +11,14 @@ class TargetWealthAgent(BaseAgent):
         and its state, then write chosen option to market_env.order_book
     """
 
-    def __init__(self, agent_id, money, inventory, target_level=0.5):
-        self.id = agent_id
-        self._money = money
-        self._inventory = inventory
-        self._target_level = target_level
+    def setup(self):
+        self._money = self.p.Setup['TargetWealthAgent']['start_money']
+        self._inventory = self.p.Setup['TargetWealthAgent']['start_inventory']
+        self._target_level = self.p.Setup['TargetWealthAgent']['target_level']
 
-    def make_decision(self, market_env):
-        price_history = market_env.get_history().get_prices()
+    def make_decision(self):
+        market_env = self.model.market_env
+        price_history = market_env.get_history().deals_prices
         if len(price_history) == 0:
             return
         order_price = price_history[-1]

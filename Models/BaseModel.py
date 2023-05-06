@@ -13,15 +13,18 @@ class BaseModel(ap.Model):
     def setup(self):
         self.market_env = MarketEnv()
         self.agents = dict()
-        for tp, cnt in self.p.agents:
+        for tp, cnt in self.p.Agents.items():
             self.agents[tp] = ap.AgentList(self, cnt, tp)
 
     def step(self):
         for agent_sublist in self.agents.values():
-            agent_sublist.make_dessision()
+            agent_sublist.make_decision()
 
     def update(self):
+        if self.t == 0:
+            return
         price, offer_price, bid_price = self.market_env.get_price()
+        price = self.market_env.get_price()
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)

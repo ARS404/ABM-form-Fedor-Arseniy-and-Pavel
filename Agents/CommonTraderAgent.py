@@ -1,4 +1,4 @@
-import BaseAgent
+from Agents.BaseAgent import BaseAgent
 from scipy.stats import lognorm
 from scipy.stats import bernoulli
 from constants import OperationTypes
@@ -17,16 +17,16 @@ class CommonTraderAgent(BaseAgent):
         and its state, then write chosen option to market_env.order_book
     """
 
-    def __init__(self, agent_id, money, inventory, risk_level=1, sell_probability=0.5, price_variance=1):
-        self.id = agent_id
-        self._money = money
-        self._inventory = inventory
-        self._risk_level = risk_level
-        self._sell_probability = sell_probability
-        self._price_variance = price_variance
+    def setup(self):
+        self._money = self.p.Setup['CommonTraderAgent']['start_money']
+        self._inventory = self.p.Setup['CommonTraderAgent']['start_inventory']
+        self._risk_level = self.p.Setup['CommonTraderAgent']['risk_level']
+        self._sell_probability = self.p.Setup['CommonTraderAgent']['sell_probability']
+        self._price_variance = self.p.Setup['CommonTraderAgent']['price_variance']
 
-    def make_decision(self, market_env):
-        price_history = market_env.get_history().get_prices()
+    def make_decision(self):
+        market_env = self.model.market_env
+        price_history = market_env.get_history().deals_prices
         if len(price_history) == 0:
             return
         order_price = price_history[-1] * lognorm.rvs(s=self._price_variance, size=1)

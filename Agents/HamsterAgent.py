@@ -1,4 +1,4 @@
-import BaseAgent
+from Agents.BaseAgent import BaseAgent
 from constants import OperationTypes
 from scipy.stats import norm
 
@@ -12,14 +12,14 @@ class HamsterAgent(BaseAgent):
         and its state, then write chosen option to market_env.order_book
     """
 
-    def __init__(self, agent_id, money, inventory, risk_level=1):
-        self.id = agent_id
-        self._money = money
-        self._inventory = inventory
-        self._risk_level = risk_level
+    def setup(self):
+        self._money = self.p.Setup['HamsterAgent']['start_money']
+        self._inventory = self.p.Setup['HamsterAgent']["start_inventory"]
+        self._risk_level = self.p.Setup['HamsterAgent']['risk_level']
 
-    def make_decision(self, market_env):
-        price_history = market_env.get_history().get_prices()
+    def make_decision(self):
+        market_env = self.model.market_env
+        price_history = market_env.get_history().deals_prices
         if len(price_history) < 2:
             return
         order_price = 2 * price_history[-1] - price_history[-2]

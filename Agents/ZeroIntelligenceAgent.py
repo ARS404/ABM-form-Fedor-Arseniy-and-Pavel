@@ -1,4 +1,4 @@
-import BaseAgent
+from Agents.BaseAgent import BaseAgent
 from scipy.stats import uniform
 from scipy.stats import bernoulli
 
@@ -15,16 +15,17 @@ class ZeroIntelligenceAgent(BaseAgent):
         and its state, then write chosen option to market_env.order_book
     """
 
-    def __init__(self, agent_id, money, inventory, risk_level=1, min_money=0, min_inventory=0):
-        self.id = agent_id
-        self._money = money
-        self._inventory = inventory
-        self._risk_level = risk_level
-        self._min_money = min_money
-        self._min_inventory = min_inventory
+    def setup(self):
+        self._money = self.p.Setup['ZeroIntelligenceAgent']['start_money']
+        self._inventory = self.p.Setup['ZeroIntelligenceAgent']['start_inventory']
+        self._risk_level = self.p.Setup['ZeroIntelligenceAgent']['risk_level']
+        self._min_money = self.p.Setup['ZeroIntelligenceAgent']['min_money']
+        self._min_inventory = self.p.Setup['ZeroIntelligenceAgent']['min_inventory']
 
-    def make_decision(self, market_env):
-        price_history = market_env.get_history().get_prices()
+
+    def make_decision(self):
+        market_env = self.model.market_env
+        price_history = market_env.get_history().deals_prices
         if self._inventory < self._min_inventory and self._money < self._min_money or len(price_history) == 0:
             return
         order_price = price_history[-1]
