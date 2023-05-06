@@ -14,6 +14,7 @@ class MarketHistory():
             self.seller = None
             self.amount = None
 
+
     def __init__(self):
         self._orders = list() #iter -> IterInfo
 

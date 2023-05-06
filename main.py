@@ -1,6 +1,7 @@
 import agentpy as ap
 import ipysimulate as ips
 
+
 from ipywidgets import AppLayout
 
 from Models.BaseModel import BaseModel
