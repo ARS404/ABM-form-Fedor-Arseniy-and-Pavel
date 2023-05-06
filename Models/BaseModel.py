@@ -1,6 +1,9 @@
 import agentpy as ap
 
 from Agents.BaseAgent import BaseAgent
+from MarketEnv.MarketEnv import MarketEnv
+
+from constants import OperationTypes
 
 class BaseModel(ap.Model):
     """
@@ -10,6 +13,7 @@ class BaseModel(ap.Model):
     """
 
     def setup(self):
+        self.market_env = MarketEnv()
         self.agents = dict()
         for tp, cnt in self.p.agents:
             self.agents[tp] = ap.AgentList(self, cnt, tp)
@@ -19,8 +23,12 @@ class BaseModel(ap.Model):
             agent_sublist.make_dessision()
 
     def update(self):
-        super().update()
-        # Here we should write code to make exchange between agents
+        price = self.market_env.get_price()
+
+        sell_offers = list(offer for offer in self.market_env.order_book.data
+                           if offer.operration_type == OperationTypes.SELL)
+        buy_offers = list(offer for offer in self.market_env.order_book.data
+                          if offer.operration_type == OperationTypes.BUY)
 
     def end(self):
         pass

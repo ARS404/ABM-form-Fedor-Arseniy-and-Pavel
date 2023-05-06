@@ -1,10 +1,4 @@
-from enum import Enum
-
-
-class OperationTypes(Enum):
-    SELL = "sell"
-    BUY = "buy"
-
+from constants import OperationTypes
 
 class OrderBookException(Exception):
     def __init__(self, message="You have to send some error message"):
