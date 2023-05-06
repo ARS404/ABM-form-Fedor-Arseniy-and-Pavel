@@ -86,3 +86,4 @@ class OrderBook(object):
                     best_price = prices[i]
 
         return best_price
+
