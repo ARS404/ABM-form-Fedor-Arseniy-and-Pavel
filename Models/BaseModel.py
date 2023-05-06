@@ -25,10 +25,27 @@ class BaseModel(ap.Model):
     def update(self):
         price = self.market_env.get_price()
 
-        sell_offers = list(offer for offer in self.market_env.order_book.data
-                           if offer.operration_type == OperationTypes.SELL)
-        buy_offers = list(offer for offer in self.market_env.order_book.data
-                          if offer.operration_type == OperationTypes.BUY)
+        sell_offers = self.market_env.order_book.sellers_at_price(price)
+        buy_offers = self.market_env.order_book.buyers_at_price(price)
+
+        sell_ind = 0
+        buy_ind = 0
+        while sell_ind != len(sell_offers) and buy_ind != len(buy_offers):
+            sell_of = sell_offers[sell_ind]
+            buy_of = buy_offers[buy_ind]
+
+            total_quantity = 0
+            if sell_of.quantity >= buy_of.quantity:
+                sell_of.quantity -= buy_of.quantity
+                total_quantity = buy_of.quantity
+                buy_ind += 1
+            else:
+                buy_of.quantity -= sell_of.quantity
+                total_quantity = sell_of.quantity
+                sell_ind += 1
+            sell_of.trader.change_balance(-1 * total_quantity, total_quantity * price)
+            buy_of.trader.change_balance(total_quantity, -1 * total_quantity * price)
+        self.market_env.order_book.clean()
 
     def end(self):
         pass

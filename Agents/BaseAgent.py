@@ -12,10 +12,14 @@ class BaseAgent(ap.Agent):
         return self.id
 
     def setup(self):
-        raise NotImplementedError
+        self.money = self.p.start_money[BaseAgent]
+        self.invent = self.p.start_invent[BaseAgent]
 
     def make_decision(self, market_env):
         raise NotImplementedError
 
+    def change_balance(self, d_money, d_invent):
+        self.money += d_money
+        self.invvent += d_invent
 
 
