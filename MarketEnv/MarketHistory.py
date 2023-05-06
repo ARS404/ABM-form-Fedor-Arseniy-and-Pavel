@@ -1,4 +1,4 @@
-class MarketHistory():
+class MarketHistory(object):
     """
     This class contains classes:
         - Deal - primitive structure for storing deal information
@@ -8,15 +8,21 @@ class MarketHistory():
     This class contains methods:
         - get_prices(self) :list of float: return list of prices set at previous iterations
     """
-    class Deal():
-        def __init__(self):
-            self.buyer = None
-            self.seller = None
-            self.amount = None
-
+    class Deal(object):
+        def __init__(self, buyer=None, seller=None, quantity=None):
+            self.buyer = buyer
+            self.seller = seller
+            self.quantity = quantity
 
     def __init__(self):
-        self._orders = list() #iter -> IterInfo
+        self.deals = list()
+        self.deals_prices = list()
 
-    def get_prices(self):
-        return list(map(lambda x: x.price, self._orders))
+    def start_new_iter(self):
+        self.deals.append(list())
+
+    def add_deal(self, buyer, seller, quantity):
+        self.deals[-1].append(MarketHistory.Deal(buyer, seller, quantity))
+
+    def add_deal_price(self, price):
+        self.deals_prices.append(price)
