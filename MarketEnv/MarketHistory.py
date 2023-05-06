@@ -19,4 +19,3 @@ class MarketHistory():
 
     def get_prices(self):
         return list(map(lambda x: x.price, self._orders))
-
