@@ -1,5 +1,6 @@
 from constants import OperationTypes
 
+
 class OrderBookException(Exception):
     def __init__(self, message="You have to send some error message"):
         self.message = message
@@ -81,4 +82,3 @@ class OrderBook(object):
                     best_price = prices[i]
 
         return best_price
-
