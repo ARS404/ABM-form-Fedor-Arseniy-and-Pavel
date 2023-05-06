@@ -1,7 +1,6 @@
 import agentpy as ap
 
 
-
 class BaseModel(ap.Model):
     """
     Methods:
@@ -12,6 +11,7 @@ class BaseModel(ap.Model):
     def __init__(self, agent_list, market_env):
         self.agents = agent_list
         self.market_env = market_env
+
     def setup(self):
         pass
 
@@ -23,6 +23,9 @@ class BaseModel(ap.Model):
         for agent in self.agents:
             agent.make_decision(self.market_env)
 
+    def update(self):
+        ap.Model.update(self)
         # Here we should write code to make exchange between agents
+    
 
 
