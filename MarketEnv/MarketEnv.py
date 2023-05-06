@@ -18,7 +18,7 @@ class MarketEnv(object):
         self.market_history = MarketHistory()
 
     def add_order(self, price, quantity, trader_id):
-        self.order_book.data.append(OrderBook.Order(price, quantity, trader_id))
+        self.order_book.add_order(price, quantity, trader_id)
 
     def get_history(self):
         return self.market_history

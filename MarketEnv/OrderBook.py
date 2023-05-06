@@ -1,5 +1,16 @@
 class OrderBook():
-
+    """
+    This class contains classes:
+        - Order - primitive structure for order storing
+    This class contains params:
+        - data :list of Order: current order book
+    This class contains methods:
+        - clean(self) :void: cleaning the data
+        - add_order(self, price, quantity, trader_id) :void: add order to the order book
+        - buyers_at_price(self, price) :list of Order: return list of orders, which would try to buy at given price
+        - sellers_at_price(self, price) :list of Order: return list of orders, which would try to sell at given price
+        - get_price(self) :float: return the price set according to the order book
+    """
     class Order:
         def __init__(self, price, quantity, trader_id):
             self.price = price
@@ -11,6 +22,8 @@ class OrderBook():
     def clean(self):
         self.data = list()
 
+    def add_order(self, price, quantity, trader_id):
+        self.data.append(OrderBook.Order(price, quantity, trader_id))
     def buyers_at_price(self, price):
         return list(filter(lambda x: (x.quantity > 0) and (x.price <= price), self.data))
 
