@@ -1,5 +1,6 @@
-from OrderBook import OrderBook
-from MarketHistory import MarketHistory
+from .OrderBook import OrderBook
+from .MarketHistory import MarketHistory
+
 
 class MarketEnv(object):
     """
