@@ -1,9 +1,7 @@
 import agentpy as ap
 
-from Agents.BaseAgent import BaseAgent
 from MarketEnv.MarketEnv import MarketEnv
 
-from constants import OperationTypes
 
 class BaseModel(ap.Model):
     """
@@ -34,7 +32,6 @@ class BaseModel(ap.Model):
             sell_of = sell_offers[sell_ind]
             buy_of = buy_offers[buy_ind]
 
-            total_quantity = 0
             if sell_of.quantity >= buy_of.quantity:
                 sell_of.quantity -= buy_of.quantity
                 total_quantity = buy_of.quantity

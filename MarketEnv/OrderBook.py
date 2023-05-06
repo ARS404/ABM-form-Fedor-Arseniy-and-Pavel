@@ -21,13 +21,13 @@ class OrderBook(object):
         - get_price(self) :float: return the price set according to the order book
     """
     class Order:
-        def __init__(self, price, quantity, operation_type, trader_id):
+        def __init__(self, price, quantity, operation_type, trader):
             if operation_type not in OperationTypes:
                 raise OrderBookException("`quantity` value should be from `OperationTypes`")
             self.price = price
             self.quantity = quantity
             self.operation_type = operation_type
-            self.trader_id = trader_id
+            self.trader = trader
 
     def __init__(self):
         self.data = list()
@@ -35,8 +35,8 @@ class OrderBook(object):
     def clean(self):
         self.data = list()
 
-    def add_order(self, price, quantity, operation_type, trader_id):
-        self.data.append(OrderBook.Order(price, quantity, operation_type, trader_id))
+    def add_order(self, price, quantity, operation_type, trader):
+        self.data.append(OrderBook.Order(price, quantity, operation_type, trader))
 
     def buyers_at_price(self, price):
         return list(filter(lambda x: (x.operation_type == OperationTypes.BUY) and (x.price <= price), self.data))

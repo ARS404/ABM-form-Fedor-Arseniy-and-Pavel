@@ -18,8 +18,8 @@ class MarketEnv(object):
         self.order_book = OrderBook()
         self.market_history = MarketHistory()
 
-    def add_order(self, price, quantity, trader_id):
-        self.order_book.add_order(price, quantity, trader_id)
+    def add_order(self, price, quantity, operation_type, trader):
+        self.order_book.add_order(price, quantity, operation_type, trader)
 
     def get_history(self):
         return self.market_history
@@ -44,6 +44,7 @@ class MarketEnv(object):
 
 
 def main():
+    # TODO: rewrite tests
     m_env = MarketEnv()
     for i in range(4, 6):
         m_env.add_order((i**4 + 234) / (i**3 + 54), 2 * i, i)
