@@ -1,5 +1,6 @@
 import agentpy as ap
 
+from Agents.BaseAgent import BaseAgent
 
 class BaseModel(ap.Model):
     """
@@ -8,24 +9,20 @@ class BaseModel(ap.Model):
         - setup(self) -> void : some shit from ap.Model superclass ...
     """
 
-    def __init__(self, agent_list, market_env):
-        self.agents = agent_list
-        self.market_env = market_env
-
     def setup(self):
-        pass
+        self.agents = dict()
+        for tp, cnt in self.p.agents:
+            self.agents[tp] = ap.AgentList(self, cnt, tp)
 
     def step(self):
-        ap.Model.step(self)
-
-        self.market_env.clean_order_book()
-
-        for agent in self.agents:
-            agent.make_decision(self.market_env)
+        for agent_sublist in self.agents.values():
+            agent_sublist.make_dessision()
 
     def update(self):
-        ap.Model.update(self)
+        super().update()
         # Here we should write code to make exchange between agents
-    
+
+    def end(self):
+        pass
 
 
