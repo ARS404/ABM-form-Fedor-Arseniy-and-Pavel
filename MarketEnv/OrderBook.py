@@ -1,4 +1,18 @@
-class OrderBook():
+from enum import Enum
+
+
+class OperationTypes(Enum):
+    SELL = "sell"
+    BUY = "buy"
+
+
+class OrderBookException(Exception):
+    def __init__(self, message="You have to send some error message"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class OrderBook(object):
     """
     This class contains classes:
         - Order - primitive structure for order storing
@@ -13,26 +27,30 @@ class OrderBook():
     """
     class Order:
         def __init__(self, price, quantity, trader_id):
+            if quantity not in OperationTypes:
+                raise OrderBookException("`quantity` value should be from `OperationTypes`")
             self.price = price
             self.quantity = quantity
             self.trader_id = trader_id
 
     def __init__(self):
         self.data = list()
+
     def clean(self):
         self.data = list()
 
     def add_order(self, price, quantity, trader_id):
         self.data.append(OrderBook.Order(price, quantity, trader_id))
+
     def buyers_at_price(self, price):
-        return list(filter(lambda x: (x.quantity > 0) and (x.price <= price), self.data))
+        return list(filter(lambda x: (x.quantity == OperationTypes.BUY) and (x.price <= price), self.data))
 
     def sellers_at_price(self, price):
-        list(filter(lambda x: (x.quantity < 0) and (x.price >= price), self.data))
+        list(filter(lambda x: (x.quantity == OperationTypes.SELL) and (x.price >= price), self.data))
 
     def get_price(self):
-        buys = list(filter(lambda x: x.quantity > 0, self.data))
-        sells = list(filter(lambda x: x.quantity < 0, self.data))
+        buys = list(filter(lambda x: x.quantity == OperationTypes.BUY, self.data))
+        sells = list(filter(lambda x: x.quantity == OperationTypes.SELL, self.data))
         buys.sort(key=lambda x: x.price)
         sells.sort(key=lambda x: x.price, reverse=True)
         prices = set(map(lambda x: x.price, self.data))
