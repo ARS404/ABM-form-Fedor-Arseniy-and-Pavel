@@ -16,6 +16,8 @@ class MarketHistory(object):
 
     def __init__(self):
         self.deals = list()
+        self.offer_prices = list()
+        self.bid_prices = list()
         self.deals_prices = list()
 
     def start_new_iter(self):
@@ -26,3 +28,18 @@ class MarketHistory(object):
 
     def add_deal_price(self, price):
         self.deals_prices.append(price)
+
+    def add_offer_price(self, price):
+        self.offer_prices.append(price)
+
+    def add_bid_price(self, price):
+        self.bid_prices.append(price)
+
+    def get_prices(self):
+        return self.deals_prices
+
+    def get_bid_prices(self):
+        return self.bid_prices
+
+    def get_offer_prices(self):
+        return self.offer_prices

@@ -21,9 +21,11 @@ class BaseModel(ap.Model):
             agent_sublist.make_dessision()
 
     def update(self):
-        price = self.market_env.get_price()
+        price, offer_price, bid_price = self.market_env.get_price()
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
+        self.market_env.market_history.add_offer_price(offer_price)
+        self.market_env.market_history.add_bid_price(bid_price)
 
         sell_offers = self.market_env.order_book.sellers_at_price(price)
         buy_offers = self.market_env.order_book.buyers_at_price(price)
