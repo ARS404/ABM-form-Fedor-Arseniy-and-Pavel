@@ -18,11 +18,15 @@ class TargetWealthAgent(BaseAgent):
 
     def make_decision(self):
         market_env = self.model.market_env
-        price_history = market_env.get_history().deals_prices
-        if len(price_history) == 0:
-            return
-        order_price = price_history[-1]
-        inventory_value = self._inventory * price_history[-1]
+        price_history = market_env.get_history().get_prices()
+
+        # TODO: fix this shit
+        if len(price_history) > 0:
+            order_price = price_history[-1]
+        else:
+            order_price = 1
+
+        inventory_value = self._inventory * order_price
         new_inventory_value = (inventory_value + self._money) * self._target_level / (self._target_level + 1)
         new_inventory = new_inventory_value / order_price
         if new_inventory == self._inventory:

@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class MarketHistory(object):
     """
     This class contains classes:
@@ -36,7 +39,7 @@ class MarketHistory(object):
         self.bid_prices.append(price)
 
     def get_prices(self):
-        return self.deals_prices
+        return deepcopy(self.deals_prices)
 
     def get_bid_prices(self):
         return self.bid_prices

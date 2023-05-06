@@ -25,7 +25,7 @@ class ZeroIntelligenceAgent(BaseAgent):
 
     def make_decision(self):
         market_env = self.model.market_env
-        price_history = market_env.get_history().deals_prices
+        price_history = market_env.get_history().get_prices()
         if self._inventory < self._min_inventory and self._money < self._min_money or len(price_history) == 0:
             return
         order_price = price_history[-1]

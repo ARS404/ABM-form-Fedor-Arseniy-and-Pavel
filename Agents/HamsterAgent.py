@@ -19,7 +19,7 @@ class HamsterAgent(BaseAgent):
 
     def make_decision(self):
         market_env = self.model.market_env
-        price_history = market_env.get_history().deals_prices
+        price_history = market_env.get_history().get_prices()
         if len(price_history) < 2:
             return
         order_price = 2 * price_history[-1] - price_history[-2]

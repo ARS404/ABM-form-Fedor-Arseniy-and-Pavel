@@ -14,6 +14,8 @@ class BaseModel(ap.Model):
         self.market_env = MarketEnv()
         self.agents = dict()
         for tp, cnt in self.p.Agents.items():
+            if cnt == 0:
+                continue
             self.agents[tp] = ap.AgentList(self, cnt, tp)
 
     def step(self):
@@ -24,7 +26,7 @@ class BaseModel(ap.Model):
         if self.t == 0:
             return
         price, offer_price, bid_price = self.market_env.get_price()
-        price = self.market_env.get_price()
+        _, price, _ = self.market_env.get_price()
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
