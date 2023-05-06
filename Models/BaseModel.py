@@ -22,6 +22,8 @@ class BaseModel(ap.Model):
 
     def update(self):
         price = self.market_env.get_price()
+        self.market_env.market_history.start_new_iter()
+        self.market_env.market_history.add_deal_price(price)
 
         sell_offers = self.market_env.order_book.sellers_at_price(price)
         buy_offers = self.market_env.order_book.buyers_at_price(price)
@@ -42,6 +44,7 @@ class BaseModel(ap.Model):
                 sell_ind += 1
             sell_of.trader.change_balance(-1 * total_quantity, total_quantity * price)
             buy_of.trader.change_balance(total_quantity, -1 * total_quantity * price)
+            self.market_env.market_history.add_deal(sell_of.trader, buy_of.trader, total_quantity)
         self.market_env.order_book.clean()
 
     def end(self):
