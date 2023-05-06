@@ -7,9 +7,15 @@ class OrderBook():
             self.trader_id = trader_id
 
     def __init__(self):
-        raise NotImplementedError
+        self.data = list()
     def clean(self):
         self.data = list()
+
+    def buyers_at_price(self, price):
+        return list(filter(lambda x: (x.quantity > 0) and (x.price <= price), self.data))
+
+    def sellers_at_price(self, price):
+        list(filter(lambda x: (x.quantity < 0) and (x.price >= price), self.data))
 
     def get_price(self):
         buys = list(filter(lambda x: x.quantity > 0, self.data))
