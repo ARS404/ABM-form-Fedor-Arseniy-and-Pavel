@@ -31,19 +31,19 @@ class ZeroIntelligenceAgent(BaseAgent):
         order_price = max(price_history[-1], 1)
         if self._inventory < self._min_inventory:
             order_type = OperationTypes.BUY
-            order_size = (self._money ** uniform.rvs(scale=self._risk_level, size=1)) / order_price
+            order_size = (self._money ** uniform.rvs(scale=self._risk_level)) / order_price
             market_env.add_order(order_price, order_size, order_type, self)
             return
         if self._money < self._min_money:
             order_type = OperationTypes.SELL
-            order_size = self._inventory ** uniform.rvs(scale=self._risk_level, size=1)
+            order_size = self._inventory ** uniform.rvs(scale=self._risk_level)
             market_env.add_order(order_price, order_size, order_type, self)
             return
         if bernoulli.rvs(p=0.5) == 1:
             order_type = OperationTypes.BUY
-            order_size = (self._money ** uniform.rvs(scale=self._risk_level, size=1)) / order_price
+            order_size = (self._money ** uniform.rvs(scale=self._risk_level)) / order_price
         else:
             order_type = OperationTypes.SELL
-            order_size = self._inventory ** uniform.rvs(scale=self._risk_level, size=1)
+            order_size = self._inventory ** uniform.rvs(scale=self._risk_level)
         market_env.add_order(order_price, order_size, order_type, self)
         return

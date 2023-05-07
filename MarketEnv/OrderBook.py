@@ -1,3 +1,5 @@
+import numpy as np
+
 from constants import OperationTypes
 import numpy
 
@@ -49,8 +51,9 @@ class OrderBook(object):
         sells = list(filter(lambda x: x.operation_type == OperationTypes.SELL, self.data))
         buys.sort(key=lambda x: x.price)
         sells.sort(key=lambda x: x.price, reverse=True)
-        prices = numpy.unique(list(map(lambda x: x.price, self.data)))
+        prices = np.unique(list(map(lambda x: x.price, self.data)))
         prices = list(prices)
+        print(prices)
         prices.sort()
         total_buys_for_price = [0.0 for i in range(len(prices))]
         total_sells_for_price = [0.0 for i in range(len(prices))]
