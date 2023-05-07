@@ -22,7 +22,7 @@ class TargetWealthAgent(BaseAgent):
 
         # TODO: fix this shit
         if len(price_history) > 0:
-            order_price = price_history[-1]
+            order_price = max(price_history[-1], 1)
         else:
             order_price = 1
 

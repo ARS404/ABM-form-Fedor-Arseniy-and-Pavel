@@ -1,5 +1,5 @@
 from constants import OperationTypes
-
+import numpy
 
 class OrderBookException(Exception):
     def __init__(self, message="You have to send some error message"):
@@ -49,7 +49,7 @@ class OrderBook(object):
         sells = list(filter(lambda x: x.operation_type == OperationTypes.SELL, self.data))
         buys.sort(key=lambda x: x.price)
         sells.sort(key=lambda x: x.price, reverse=True)
-        prices = set(map(lambda x: x.price, self.data))
+        prices = numpy.unique(list(map(lambda x: x.price, self.data)))
         prices = list(prices)
         prices.sort()
         total_buys_for_price = [0.0 for i in range(len(prices))]
