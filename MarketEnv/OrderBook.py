@@ -31,14 +31,20 @@ class OrderBook(object):
             self.operation_type = operation_type
             self.trader = trader
 
+        def __str__(self):
+            return f"trader with id {self.trader.id} and type {type(self.trader)} send offer of type " \
+                   f"{self.operation_type} with price {self.price} and quantity {self.quantity}"
+
     def __init__(self):
         self.data = list()
 
     def clean(self):
         self.data = list()
 
-    def add_order(self, price, quantity, operation_type, trader):
+    def add_order(self, price, quantity, operation_type, trader, report=False):
         self.data.append(OrderBook.Order(price, quantity, operation_type, trader))
+        if report:
+            print(self.data[-1])
 
     def buyers_at_price(self, price):
         return list(filter(lambda x: (x.operation_type == OperationTypes.BUY) and (x.price <= price), self.data))

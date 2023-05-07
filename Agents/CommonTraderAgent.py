@@ -34,5 +34,5 @@ class CommonTraderAgent(BaseAgent):
         else:
             order_type = OperationTypes.BUY
             order_size = self._risk_level * self._money / order_price
-        market_env.add_order(order_price, order_size, order_type, self)
+        market_env.add_order(order_price, order_size, order_type, self, report=self.p.report)
         return

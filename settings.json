@@ -4,7 +4,7 @@
       "HamsterAgent": 0,
       "TargetWealthAgent": 0,
       "ZeroIntelligenceAgent": 0,
-      "CommonTraderAgent": 200
+      "CommonTraderAgent": 20
     },
     "Setup": {
       "HamsterAgent": {
@@ -27,13 +27,14 @@
       "CommonTraderAgent": {
         "start_money": 100.0,
         "start_inventory": 100.0,
-        "risk_level": 1,
+        "risk_level": 0.5,
         "sell_probability": 0.5,
-        "price_variance": 0.01
+        "price_variance": 0.1
       }
     },
-    "steps": 1000,
-    "start_price": 1.0
+    "steps": 100,
+    "start_price": 1.0,
+    "report": true
   },
   "OnlyCommonTraders": {
     "Agents": {
@@ -69,6 +70,7 @@
       }
     },
     "steps": 100,
-    "start_price": 1.0
+    "start_price": 1.0,
+    "report": false
   }
 }

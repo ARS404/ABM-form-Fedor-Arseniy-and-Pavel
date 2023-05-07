@@ -33,4 +33,4 @@ class TargetWealthAgent(BaseAgent):
         else:
             order_size = self._inventory - new_inventory
             order_type = OperationTypes.SELL
-        market_env.add_order(order_price, order_size, order_type, self)
+        market_env.add_order(order_price, order_size, order_type, self, report=self.p.report)

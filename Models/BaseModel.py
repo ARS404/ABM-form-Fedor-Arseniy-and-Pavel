@@ -56,6 +56,7 @@ class BaseModel(ap.Model):
         self.market_env.order_book.clean()
 
     def end(self):
-        pass
+        print('\n------------------MARKET HISTORY------------------')
+        print(list(map(lambda x: str(x), self.market_env.market_history.deals[-1])))
 
 

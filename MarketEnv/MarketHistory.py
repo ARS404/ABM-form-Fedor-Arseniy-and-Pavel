@@ -17,6 +17,9 @@ class MarketHistory(object):
             self.seller = seller
             self.quantity = quantity
 
+        def __str__(self):
+            return f"{self.seller.id} -> {self.buyer.id} with count {self.quantity}"
+
     def __init__(self):
         self.deals = list()
         self.offer_prices = list()
