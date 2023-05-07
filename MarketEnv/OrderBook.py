@@ -55,8 +55,8 @@ class OrderBook(object):
     def get_price(self):
         buys = list(filter(lambda x: x.operation_type == OperationTypes.BUY, self.data))
         sells = list(filter(lambda x: x.operation_type == OperationTypes.SELL, self.data))
-        buys.sort(key=lambda x: x.price)
-        sells.sort(key=lambda x: x.price, reverse=True)
+        buys.sort(key=lambda x: x.price, reverse=True)
+        sells.sort(key=lambda x: x.price)
         prices = np.unique(list(map(lambda x: x.price, self.data)))
         prices = list(prices)
         prices.sort()
@@ -66,19 +66,19 @@ class OrderBook(object):
         cur_seller = 0
         for i in range(len(prices)):
             if i > 0:
-                total_buys_for_price[i] += total_buys_for_price[i - 1]
-            while cur_buyer < len(buys) and buys[cur_buyer].price <= prices[i]:
-                total_buys_for_price[i] += buys[cur_buyer].quantity
-                cur_buyer += 1
+                total_sells_for_price[i] += total_sells_for_price[i - 1]
+            while cur_seller < len(sells) and sells[cur_seller].price <= prices[i]:
+                total_sells_for_price[i] += sells[cur_seller].quantity
+                cur_seller += 1
         prices.reverse()
 
         for i in range(len(prices)):
             if i > 0:
-                total_sells_for_price[i] += total_sells_for_price[i - 1]
-            while cur_seller < len(sells) and sells[cur_seller].price >= prices[i]:
-                total_sells_for_price[i] += sells[cur_seller].quantity
-                cur_seller += 1
-        total_sells_for_price.reverse()
+                total_buys_for_price[i] += total_buys_for_price[i - 1]
+            while cur_buyer < len(buys) and buys[cur_buyer].price >= prices[i]:
+                total_buys_for_price[i] += buys[cur_buyer].quantity
+                cur_buyer += 1
+        total_buys_for_price.reverse()
         best_price = None
         best_quantity = None
         prices.reverse()
@@ -101,4 +101,12 @@ class OrderBook(object):
             if sells[i].price <= best_price:
                 break
             offer_price = sells[i].price
+        # from matplotlib import pyplot as plt
+        # figure = plt.figure(1, figsize=(15, 10))
+        # # plt.hist(list(map(lambda x: x.price, buys)), 40, label='buy', weights=list(map(lambda x: x.quantity, buys)))
+        # # plt.hist(list(map(lambda x: x.price, sells)), 40, label='sell', weights=list(map(lambda x: x.quantity, sells)))
+        # # plt.axvline(x=best_price, color='r')
+        # # plt.legend()
+        # # plt.savefig(f"Hists/{best_price}.png")
+        # # plt.close(figure)
         return best_price, offer_price, bid_price

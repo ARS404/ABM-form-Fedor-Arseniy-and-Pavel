@@ -1,7 +1,10 @@
 import json
 
 from copy import deepcopy
+
+import matplotlib.pyplot as plt
 from matplotlib import pyplot
+import numpy as np
 import agentpy as ap
 import ipysimulate as ips
 from ipywidgets import AppLayout
@@ -44,10 +47,18 @@ def main():
     #     height='400px'
     # )
     result = model.run()
-    print(model.market_env.market_history.get_prices())
-    pyplot.figure(1, figsize=(60, 15))
-    pyplot.plot(model.market_env.market_history.get_prices(), "bo-")
+    prices = model.market_env.market_history.get_prices()
+    u = list()
+    for i in range(20, len(prices) - 1):
+        u.append(np.log(prices[i + 1] / prices[i]))
+    figure1 = pyplot.figure(1, figsize=(20, 10))
+    plt.hist(u, 50, density=True)
+    pyplot.savefig("b.png")
+    plt.close(figure1)
+    figure2 = pyplot.figure(1, figsize=(60, 15))
+    plt.plot(model.market_env.market_history.get_prices(), "bo-")
     pyplot.savefig("a.png")
+    plt.close(figure2)
     print(result)
 
 
