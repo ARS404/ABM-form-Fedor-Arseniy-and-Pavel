@@ -39,7 +39,7 @@ class OrderBook(object):
         self.data = list()
 
     def clean(self):
-        self.data = list()
+        self.data.clear()
 
     def add_order(self, price, quantity, operation_type, trader, report=False):
         self.data.append(OrderBook.Order(price, quantity, operation_type, trader))
@@ -101,12 +101,4 @@ class OrderBook(object):
             if sells[i].price <= best_price:
                 break
             offer_price = sells[i].price
-        # from matplotlib import pyplot as plt
-        # figure = plt.figure(1, figsize=(15, 10))
-        # # plt.hist(list(map(lambda x: x.price, buys)), 40, label='buy', weights=list(map(lambda x: x.quantity, buys)))
-        # # plt.hist(list(map(lambda x: x.price, sells)), 40, label='sell', weights=list(map(lambda x: x.quantity, sells)))
-        # # plt.axvline(x=best_price, color='r')
-        # # plt.legend()
-        # # plt.savefig(f"Hists/{best_price}.png")
-        # # plt.close(figure)
         return best_price, offer_price, bid_price
