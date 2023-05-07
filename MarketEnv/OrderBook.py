@@ -1,5 +1,7 @@
-from constants import OperationTypes
+import numpy as np
 
+from constants import OperationTypes
+import numpy
 
 class OrderBookException(Exception):
     def __init__(self, message="You have to send some error message"):
@@ -29,27 +31,33 @@ class OrderBook(object):
             self.operation_type = operation_type
             self.trader = trader
 
+        def __str__(self):
+            return f"trader with id {self.trader.id} and type {type(self.trader)} send offer of type " \
+                   f"{self.operation_type} with price {self.price} and quantity {self.quantity}"
+
     def __init__(self):
         self.data = list()
 
     def clean(self):
-        self.data = list()
+        self.data.clear()
 
-    def add_order(self, price, quantity, operation_type, trader):
+    def add_order(self, price, quantity, operation_type, trader, report=False):
         self.data.append(OrderBook.Order(price, quantity, operation_type, trader))
+        if report:
+            print(self.data[-1])
 
     def buyers_at_price(self, price):
         return list(filter(lambda x: (x.operation_type == OperationTypes.BUY) and (x.price <= price), self.data))
 
     def sellers_at_price(self, price):
-        return list(filter(lambda x: (x.operation_type == OperationTypes.SELL.value) and (x.price >= price), self.data))
+        return list(filter(lambda x: (x.operation_type == OperationTypes.SELL) and (x.price >= price), self.data))
 
     def get_price(self):
         buys = list(filter(lambda x: x.operation_type == OperationTypes.BUY, self.data))
         sells = list(filter(lambda x: x.operation_type == OperationTypes.SELL, self.data))
-        buys.sort(key=lambda x: x.price)
-        sells.sort(key=lambda x: x.price, reverse=True)
-        prices = set(map(lambda x: x.price, self.data))
+        buys.sort(key=lambda x: x.price, reverse=True)
+        sells.sort(key=lambda x: x.price)
+        prices = np.unique(list(map(lambda x: x.price, self.data)))
         prices = list(prices)
         prices.sort()
         total_buys_for_price = [0.0 for i in range(len(prices))]
@@ -58,18 +66,19 @@ class OrderBook(object):
         cur_seller = 0
         for i in range(len(prices)):
             if i > 0:
-                total_buys_for_price[i] += total_buys_for_price[i - 1]
-            while cur_buyer < len(buys) and buys[cur_buyer].price <= prices[i]:
-                total_buys_for_price[i] += buys[cur_buyer].quantity
-                cur_buyer += 1
-        prices.reverse()
-        for i in range(len(prices)):
-            if i > 0:
                 total_sells_for_price[i] += total_sells_for_price[i - 1]
-            while cur_seller < len(sells) and sells[cur_seller].price >= prices[i]:
+            while cur_seller < len(sells) and sells[cur_seller].price <= prices[i]:
                 total_sells_for_price[i] += sells[cur_seller].quantity
                 cur_seller += 1
-        total_sells_for_price.reverse()
+        prices.reverse()
+
+        for i in range(len(prices)):
+            if i > 0:
+                total_buys_for_price[i] += total_buys_for_price[i - 1]
+            while cur_buyer < len(buys) and buys[cur_buyer].price >= prices[i]:
+                total_buys_for_price[i] += buys[cur_buyer].quantity
+                cur_buyer += 1
+        total_buys_for_price.reverse()
         best_price = None
         best_quantity = None
         prices.reverse()

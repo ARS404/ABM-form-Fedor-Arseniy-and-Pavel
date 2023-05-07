@@ -1,5 +1,6 @@
 from Agents.BaseAgent import BaseAgent
 from constants import OperationTypes
+from scipy.stats import uniform
 
 
 class TargetWealthAgent(BaseAgent):
@@ -20,11 +21,7 @@ class TargetWealthAgent(BaseAgent):
         market_env = self.model.market_env
         price_history = market_env.get_history().get_prices()
 
-        # TODO: fix this shit
-        if len(price_history) > 0:
-            order_price = price_history[-1]
-        else:
-            order_price = 1
+        order_price = price_history[-1] * uniform.rvs(loc=0.99, scale=0.02)
 
         inventory_value = self._inventory * order_price
         new_inventory_value = (inventory_value + self._money) * self._target_level / (self._target_level + 1)
@@ -37,4 +34,4 @@ class TargetWealthAgent(BaseAgent):
         else:
             order_size = self._inventory - new_inventory
             order_type = OperationTypes.SELL
-        market_env.add_order(order_price, order_size, order_type, self)
+        market_env.add_order(order_price, order_size, order_type, self, report=self.p.report)
