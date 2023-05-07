@@ -22,7 +22,6 @@ class ZeroIntelligenceAgent(BaseAgent):
         self._min_money = self.p.Setup['ZeroIntelligenceAgent']['min_money']
         self._min_inventory = self.p.Setup['ZeroIntelligenceAgent']['min_inventory']
 
-
     def make_decision(self):
         market_env = self.model.market_env
         price_history = market_env.get_history().get_prices()

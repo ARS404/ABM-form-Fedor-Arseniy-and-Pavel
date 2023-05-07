@@ -14,6 +14,7 @@ from Agents.CommonTraderAgent import CommonTraderAgent
 from Agents.HamsterAgent import HamsterAgent
 from Agents.TargetWealthAgent import TargetWealthAgent
 from Agents.ZeroIntelligenceAgent import ZeroIntelligenceAgent
+from Agents.MarketMakerAgent import MarketMakerAgent
 
 
 AGENT_FROM_STR = {
@@ -21,6 +22,7 @@ AGENT_FROM_STR = {
     "HamsterAgent": HamsterAgent,
     "TargetWealthAgent": TargetWealthAgent,
     "ZeroIntelligenceAgent": ZeroIntelligenceAgent,
+    "MarketMakerAgent": MarketMakerAgent
 }
 
 
