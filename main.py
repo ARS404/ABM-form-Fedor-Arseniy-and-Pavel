@@ -32,7 +32,7 @@ def prepare_configs(params):
 def main():
     with open('settings.json', 'r') as f:
         params = f.read()
-    parameters = json.loads(params)['FirstSetup']
+    parameters = json.loads(params)['SecondSetup']
     parameters = prepare_configs(parameters)
     model = BaseModel(parameters=parameters)
     # control = ips.Control(model, parameters, variables=('t',))
@@ -44,6 +44,7 @@ def main():
     #     height='400px'
     # )
     result = model.run()
+    print('--------------------------------------')
     print(result)
 
 

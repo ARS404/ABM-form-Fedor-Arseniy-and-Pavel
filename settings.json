@@ -10,7 +10,7 @@
       "HamsterAgent": {
         "start_money": 100.0,
         "start_inventory": 100.0,
-        "risk_level": 1.0
+        "risk_level": 0.1
       },
       "TargetWealthAgent": {
         "start_money": 100.0,
@@ -20,18 +20,55 @@
       "ZeroIntelligenceAgent": {
         "start_money": 100.0,
         "start_inventory": 100.0,
-        "risk_level": 1.0,
+        "risk_level": 0.1,
         "min_money": 0.0,
         "min_inventory": 0.0
       },
       "CommonTraderAgent": {
         "start_money": 100.0,
         "start_inventory": 100.0,
-        "risk_level": 1.0,
+        "risk_level": 0.1,
         "sell_probability": 0.5,
         "price_variance": 1.0
       }
     },
-    "steps": 100
+    "steps": 100,
+    "start_price": 1.0
+  },
+  "OnlyCommonTraders": {
+    "Agents": {
+      "HamsterAgent": 0,
+      "TargetWealthAgent": 0,
+      "ZeroIntelligenceAgent": 0,
+      "CommonTraderAgent": 100
+    },
+    "Setup": {
+      "HamsterAgent": {
+        "start_money": 100.0,
+        "start_inventory": 100.0,
+        "risk_level": 0.1
+      },
+      "TargetWealthAgent": {
+        "start_money": 100.0,
+        "start_inventory": 100.0,
+        "target_level": 0.5
+      },
+      "ZeroIntelligenceAgent": {
+        "start_money": 100.0,
+        "start_inventory": 100.0,
+        "risk_level": 0.1,
+        "min_money": 0.0,
+        "min_inventory": 0.0
+      },
+      "CommonTraderAgent": {
+        "start_money": 100.0,
+        "start_inventory": 100.0,
+        "risk_level": 0.1,
+        "sell_probability": 0.5,
+        "price_variance": 1.0
+      }
+    },
+    "steps": 100,
+    "start_price": 1.0
   }
 }

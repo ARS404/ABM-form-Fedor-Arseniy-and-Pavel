@@ -53,7 +53,6 @@ class OrderBook(object):
         sells.sort(key=lambda x: x.price, reverse=True)
         prices = np.unique(list(map(lambda x: x.price, self.data)))
         prices = list(prices)
-        print(prices)
         prices.sort()
         total_buys_for_price = [0.0 for i in range(len(prices))]
         total_sells_for_price = [0.0 for i in range(len(prices))]

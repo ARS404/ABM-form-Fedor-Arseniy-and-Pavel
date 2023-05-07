@@ -12,6 +12,9 @@ class BaseModel(ap.Model):
 
     def setup(self):
         self.market_env = MarketEnv()
+        self.market_env.market_history.add_deal_price(self.p.start_price)
+        self.market_env.market_history.add_offer_price(self.p.start_price)
+        self.market_env.market_history.add_bid_price(self.p.start_price)
         self.agents = dict()
         for tp, cnt in self.p.Agents.items():
             if cnt == 0:
@@ -55,6 +58,8 @@ class BaseModel(ap.Model):
         self.market_env.order_book.clean()
 
     def end(self):
-        pass
+        print('\n\n----------------------------')
+        print(self.market_env.market_history.deals_prices)
+        print('----------------------------')
 
 
