@@ -27,7 +27,7 @@ class CommonTraderAgent(BaseAgent):
     def make_decision(self):
         market_env = self.model.market_env
         price_history = market_env.get_history().get_prices()
-        order_price = price_history[-1] * lognorm.rvs(s=self._price_variance)
+        order_price = price_history[-1] * lognorm.rvs(s=self._price_variance, scale=1)
         if bernoulli.rvs(p=self._sell_probability) == 1:
             order_type = OperationTypes.SELL
             order_size = self._risk_level * self._inventory

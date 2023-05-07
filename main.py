@@ -1,7 +1,7 @@
 import json
 
 from copy import deepcopy
-
+from matplotlib import pyplot
 import agentpy as ap
 import ipysimulate as ips
 from ipywidgets import AppLayout
@@ -32,7 +32,7 @@ def prepare_configs(params):
 def main():
     with open('settings.json', 'r') as f:
         params = f.read()
-    parameters = json.loads(params)['SecondSetup']
+    parameters = json.loads(params)['FirstSetup']
     parameters = prepare_configs(parameters)
     model = BaseModel(parameters=parameters)
     # control = ips.Control(model, parameters, variables=('t',))
@@ -44,7 +44,10 @@ def main():
     #     height='400px'
     # )
     result = model.run()
-    print('--------------------------------------')
+    print(model.market_env.market_history.get_prices())
+    pyplot.figure(1, figsize=(60, 15))
+    pyplot.plot(model.market_env.market_history.get_prices(), "bo-")
+    pyplot.savefig("a.png")
     print(result)
 
 

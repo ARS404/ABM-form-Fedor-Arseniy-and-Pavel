@@ -22,7 +22,9 @@ class HamsterAgent(BaseAgent):
         price_history = market_env.get_history().get_prices()
         if len(price_history) < 2:
             return
-        order_price = max(2 * price_history[-1] - price_history[-2], 1)
+        order_price = 2 * price_history[-1] - price_history[-2]
+        if order_price <= 0:
+            return
         if price_history[-1] >= price_history[-2]:
             order_type = OperationTypes.SELL
             order_size = min(max(norm.rvs(loc=self._inventory * self._risk_level), 0), self._inventory)

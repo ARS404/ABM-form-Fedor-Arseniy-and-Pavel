@@ -44,7 +44,7 @@ class OrderBook(object):
         return list(filter(lambda x: (x.operation_type == OperationTypes.BUY) and (x.price <= price), self.data))
 
     def sellers_at_price(self, price):
-        return list(filter(lambda x: (x.operation_type == OperationTypes.SELL.value) and (x.price >= price), self.data))
+        return list(filter(lambda x: (x.operation_type == OperationTypes.SELL) and (x.price >= price), self.data))
 
     def get_price(self):
         buys = list(filter(lambda x: x.operation_type == OperationTypes.BUY, self.data))
@@ -65,6 +65,7 @@ class OrderBook(object):
                 total_buys_for_price[i] += buys[cur_buyer].quantity
                 cur_buyer += 1
         prices.reverse()
+
         for i in range(len(prices)):
             if i > 0:
                 total_sells_for_price[i] += total_sells_for_price[i - 1]

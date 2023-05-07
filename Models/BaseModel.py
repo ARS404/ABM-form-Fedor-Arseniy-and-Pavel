@@ -29,7 +29,6 @@ class BaseModel(ap.Model):
         if self.t == 0:
             return
         price, offer_price, bid_price = self.market_env.get_price()
-        _, price, _ = self.market_env.get_price()
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
@@ -37,7 +36,6 @@ class BaseModel(ap.Model):
 
         sell_offers = self.market_env.order_book.sellers_at_price(price)
         buy_offers = self.market_env.order_book.buyers_at_price(price)
-
         sell_ind = 0
         buy_ind = 0
         while sell_ind != len(sell_offers) and buy_ind != len(buy_offers):
@@ -52,14 +50,12 @@ class BaseModel(ap.Model):
                 buy_of.quantity -= sell_of.quantity
                 total_quantity = sell_of.quantity
                 sell_ind += 1
-            sell_of.trader.change_balance(-1 * total_quantity, total_quantity * price)
-            buy_of.trader.change_balance(total_quantity, -1 * total_quantity * price)
+            sell_of.trader.change_balance(total_quantity * price, -1 * total_quantity)
+            buy_of.trader.change_balance(-1 * total_quantity * price, total_quantity)
             self.market_env.market_history.add_deal(sell_of.trader, buy_of.trader, total_quantity)
         self.market_env.order_book.clean()
 
     def end(self):
-        print('\n\n----------------------------')
-        print(self.market_env.market_history.deals_prices)
-        print('----------------------------')
+        pass
 
 
