@@ -1,4 +1,7 @@
 import agentpy as ap
+import numpy as np
+
+from matplotlib import pyplot as plt
 
 from MarketEnv.MarketEnv import MarketEnv
 
@@ -56,7 +59,17 @@ class BaseModel(ap.Model):
         self.market_env.order_book.clean()
 
     def end(self):
-        print('\n------------------MARKET HISTORY------------------')
-        print(list(map(lambda x: str(x), self.market_env.market_history.deals[-1])))
-
+        if self.p.record_results:
+            prices = self.market_env.market_history.get_prices(limit=None)
+            u = list()
+            for i in range(20, len(prices) - 1):
+                u.append(np.log(prices[i + 1] / prices[i]))
+            figure1 = plt.figure(1, figsize=(20, 10))
+            plt.hist(u, 500, density=True)
+            plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_hist.png")
+            plt.close(figure1)
+            figure2 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
+            plt.plot(prices, "bo-")
+            plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_plot.png")
+            plt.close(figure2)
 
