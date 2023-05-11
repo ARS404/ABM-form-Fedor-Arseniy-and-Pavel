@@ -6,24 +6,17 @@ import json
 from copy import deepcopy
 
 from agentpy import Experiment
+from agentpy import IntRange
+from agentpy import Sample
 
 from Models.BaseModel import BaseModel
-from utils.AgentMapping import AGENT_FROM_STR
-
-
-def prepare_configs(params):
-    ret = deepcopy(params)
-    for name in params['Agents']:
-        ret['Agents'].pop(name)
-        ret['Agents'][AGENT_FROM_STR[name]] = params['Agents'][name]
-    return ret
+from utils.AgentMapping import AGENT_NAMES_LIST
 
 
 def get_parameters(setup_name):
     with open('settings.json', 'r') as f:
         params = f.read()
     parameters = json.loads(params)[setup_name]
-    parameters = prepare_configs(parameters)
     return parameters
 
 
@@ -35,19 +28,14 @@ def run_setup(setup_name, display=False):
 
 
 def run_experiment(setup_name, v_min, v_max, n_jobs, display=False):
-    def replace_with_new_config(new_config):
-        ret = copy.deepcopy(init_parameters)
-        for ind, cnt in enumerate(new_config):
-            ret['Agents'][AGENT_FROM_STR[used_agents[ind]]] = cnt
-        return ret
-
     def prepare_samples():
-        possible_configs = itertools.product(range(v_min, v_max + 1), repeat=len(used_agents))
-        possible_parameters = list(map(replace_with_new_config, possible_configs))
-        return possible_parameters
+        sample = deepcopy(init_parameters)
+        for agent in AGENT_NAMES_LIST:
+            if f"{agent}_count" in init_parameters.keys():
+                sample[f"{agent}_count"] = IntRange(vmin=v_min, vmax=v_max)
+        return Sample(sample, n=(v_max - v_min + 1))
 
     init_parameters = get_parameters(setup_name)
-    used_agents = sorted(init_parameters['Setup'].keys())
     samples = prepare_samples()
     experiment = Experiment(BaseModel, sample=samples, iterations=1)
     # TODO: try different backends

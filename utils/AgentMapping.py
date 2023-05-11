@@ -12,3 +12,11 @@ AGENT_FROM_STR = {
     "TargetWealthAgent": TargetWealthAgent,
     "ZeroIntelligenceAgent": ZeroIntelligenceAgent,
 }
+
+AGENT_NAMES_LIST = [
+    "CommonTraderAgent",
+    "HamsterAgent",
+    "MarketMakerAgent",
+    "TargetWealthAgent",
+    "ZeroIntelligenceAgent",
+]

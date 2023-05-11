@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from MarketEnv.MarketEnv import MarketEnv
-from utils.AgentMapping import AGENT_FROM_STR
+from utils.AgentMapping import AGENT_FROM_STR, AGENT_NAMES_LIST
 
 
 class BaseModel(ap.Model):
@@ -24,20 +24,33 @@ class BaseModel(ap.Model):
         self.market_env.market_history.add_offer_price(self.p.start_price)
         self.market_env.market_history.add_bid_price(self.p.start_price)
         self.agents = dict()
-        for tp, cnt in self.p.Agents.items():
+
+        self.used_agents = []
+        for agent_name in AGENT_NAMES_LIST:
+            try:
+                cnt = self.p.__getattr__(f"{agent_name}_count")
+            except AttributeError:
+                continue
             if cnt == 0:
                 continue
-            self.agents[tp] = ap.AgentList(self, cnt, tp)
+            self.used_agents.append(agent_name)
+        self.used_agents = sorted(self.used_agents)
+
+        for agent_name in self.used_agents:
+            cnt = self.p.__getattr__(f"{agent_name}_count")
+            self.agents[AGENT_FROM_STR[agent_name]] = ap.AgentList(self, cnt, AGENT_FROM_STR[agent_name])
         if self.p.record_logs:
-            name = sum(map(lambda x: str(x), self.p.Agents.values()))
+            name = ""
+            for x in self.used_agents:
+                name += str(self.p.__getattr__(f"{x}_count"))
             self.__log_file = os.path.join('run_results', 'logs', self.p.model_name, f"{name}.log")
             with open(self.__log_file, 'w') as f:
                 f.write("Start logging\n"
                         "Model successfully setup\n"
                         "Running configuration:\n")
                 f.flush()
-                for agent in sorted(self.p.Setup.keys()):
-                    f.write(f"\t {agent} count is {self.p.Agents[AGENT_FROM_STR[agent]]}\n")
+                for agent_name in self.used_agents:
+                    f.write(f"\t {agent_name} count is {self.p.__getattr__(f'{agent_name}_count')}\n")
                 f.write("Extracted prices:\n")
                 f.flush()
 
@@ -107,5 +120,5 @@ class BaseModel(ap.Model):
                 plt.close(figure3)
             if self.p.record_logs:
                 with open(self.__log_file, 'a') as f:
-                    f.write(f"Model successfully finished at {(datetime.datetime.now() - self.start_time) * 1000} ms")
+                    f.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time) * 1000} ms")
                     f.flush()
