@@ -18,8 +18,8 @@ class MarketMakerAgent(BaseAgent):
 
     def setup(self):
         self._money = 0
-        self._inventory = self.p.Setup['MarketMakerAgent_start_inventory']
-        self._risk_level = self.p.Setup['MarketMakerAgent_risk_level']
+        self._inventory = self.p['MarketMakerAgent_start_inventory']
+        self._risk_level = self.p['MarketMakerAgent_risk_level']
 
     def make_decision(self):
         market_env = self.model.market_env
