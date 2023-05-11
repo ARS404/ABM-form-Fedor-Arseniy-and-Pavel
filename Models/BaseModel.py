@@ -1,3 +1,5 @@
+import datetime
+
 import agentpy as ap
 import numpy as np
 
@@ -14,6 +16,7 @@ class BaseModel(ap.Model):
     """
 
     def setup(self):
+        self.start_time = datetime.datetime.now()
         self.market_env = MarketEnv()
         self.market_env.market_history.add_deal_price(self.p.start_price)
         self.market_env.market_history.add_offer_price(self.p.start_price)
@@ -57,6 +60,9 @@ class BaseModel(ap.Model):
             buy_of.trader.change_balance(-1 * total_quantity * price, total_quantity)
             self.market_env.market_history.add_deal(sell_of.trader, buy_of.trader, total_quantity)
         self.market_env.order_book.clean()
+        if self.p.print_ETA:
+            mean_time = (datetime.datetime.now() - self.start_time) / self.t
+            print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t)}", end='')
 
     def end(self):
         if self.p.record_results:
@@ -68,8 +74,13 @@ class BaseModel(ap.Model):
             plt.hist(u, 500, density=True)
             plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_hist.png")
             plt.close(figure1)
-            figure2 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
+            figure2 = plt.figure(1, figsize=(20, 10))
+            plt.hist(u, 500, density=True)
+            plt.yscale('log')
+            plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_hist_log.png")
+            plt.close(figure2)
+            figure3 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
             plt.plot(prices, "bo-")
             plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_plot.png")
-            plt.close(figure2)
+            plt.close(figure3)
 

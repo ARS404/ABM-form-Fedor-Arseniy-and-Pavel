@@ -31,10 +31,10 @@ def prepare_configs(params):
 def main():
     with open('settings.json', 'r') as f:
         params = f.read()
-    parameters = json.loads(params)['SecondSetup']
+    parameters = json.loads(params)['ExperimentalSetup']
     parameters = prepare_configs(parameters)
     model = BaseModel(parameters=parameters)
-    result = model.run()
+    result = model.run(display=False)
     print(result)
 
 
