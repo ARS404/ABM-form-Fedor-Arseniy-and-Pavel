@@ -51,6 +51,7 @@ class BaseModel(ap.Model):
                 f.flush()
                 for agent_name in self.used_agents:
                     f.write(f"\t {agent_name} count is {self.p.__getattr__(f'{agent_name}_count')}\n")
+                f.write(f"\t model steps: {self.p.steps}\n")
                 f.write("Extracted prices:\n")
                 f.flush()
 
@@ -89,20 +90,19 @@ class BaseModel(ap.Model):
         self.market_env.order_book.clean()
         if self.p.print_ETA:
             mean_time = (datetime.datetime.now() - self.start_time) / self.t
-            print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t) * 1000} ms", end='')
+            print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t)} ns", end='')
         if self.p.record_logs:
             with open(self.__log_file, 'a') as f:
                 f.write(f"\titer {self.t}: price = {price}\n")
                 f.flush()
 
     def end(self):
-        if self.p.record_results:
+        if self.p.draw_hists or self.p.draw_plots:
             prices = self.market_env.market_history.get_prices(limit=None)
             u = list()
             for i in range(20, len(prices) - 1):
                 u.append(np.log(prices[i + 1] / prices[i]))
-            if self.p.draw_hists or self.p.draw_plots:
-                template_file = os.path.join('run_results', self.p.model_name, self.p.steps)
+            template_file = os.path.join('run_results', self.p.model_name, self.p.steps)
             if self.p.draw_hists:
                 figure1 = plt.figure(1, figsize=(20, 10))
                 plt.hist(u, 500, density=True)
@@ -118,7 +118,7 @@ class BaseModel(ap.Model):
                 plt.plot(prices, "bo-")
                 plt.savefig(f"{template_file}_price_plot.png")
                 plt.close(figure3)
-            if self.p.record_logs:
-                with open(self.__log_file, 'a') as f:
-                    f.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time) * 1000} ms")
-                    f.flush()
+        if self.p.record_logs:
+            with open(self.__log_file, 'a') as f:
+                f.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time)} ns")
+                f.flush()

@@ -24,7 +24,7 @@ def run_setup(setup_name, display=False):
     parameters = get_parameters(setup_name)
     model = BaseModel(parameters=parameters)
     model.run(display=display)
-    print(f"Finish model.run with setup {setup_name}")
+    print(f"\nFinish model run with setup {setup_name}")
 
 
 def run_experiment(setup_name, v_min, v_max, n_jobs, display=False):
@@ -39,7 +39,8 @@ def run_experiment(setup_name, v_min, v_max, n_jobs, display=False):
     samples = prepare_samples()
     experiment = Experiment(BaseModel, sample=samples, iterations=1)
     # TODO: try different backends
-    experiment.run(n_jobs=n_jobs, display=display)
+    experiment.run(n_jobs=n_jobs, display=display, backend='threading')
+    print(f"\nFinish experiment run with setup {setup_name}")
 
 
 def main():
@@ -61,8 +62,7 @@ def main():
 
     args = parser.parse_args()
     if args.mode == 'run_setup':
-        run_setup(args.setup_name, args.display)
-        exit(0)
+        run_setup(args.setup_name, args.no_display)
     if args.mode == 'run_experiment':
         if args.min_val > args.max_val:
             print(f"Bad range: {(args.min_val, args.max_val)}")
