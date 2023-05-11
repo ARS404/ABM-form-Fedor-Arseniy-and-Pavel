@@ -16,11 +16,11 @@ class ZeroIntelligenceAgent(BaseAgent):
     """
 
     def setup(self):
-        self._money = self.p.Setup['ZeroIntelligenceAgent']['start_money']
-        self._inventory = self.p.Setup['ZeroIntelligenceAgent']['start_inventory']
-        self._risk_level = self.p.Setup['ZeroIntelligenceAgent']['risk_level']
-        self._min_money = self.p.Setup['ZeroIntelligenceAgent']['min_money']
-        self._min_inventory = self.p.Setup['ZeroIntelligenceAgent']['min_inventory']
+        self._money = self.p['ZeroIntelligenceAgent_start_money']
+        self._inventory = self.p['ZeroIntelligenceAgent_start_inventory']
+        self._risk_level = self.p['ZeroIntelligenceAgent_risk_level']
+        self._min_money = self.p['ZeroIntelligenceAgent_min_money']
+        self._min_inventory = self.p['ZeroIntelligenceAgent_min_inventory']
 
     def make_decision(self):
         market_env = self.model.market_env

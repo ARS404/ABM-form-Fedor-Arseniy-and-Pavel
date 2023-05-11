@@ -19,11 +19,11 @@ class CommonTraderAgent(BaseAgent):
     """
 
     def setup(self):
-        self._money = self.p.Setup['CommonTraderAgent']['start_money']
-        self._inventory = self.p.Setup['CommonTraderAgent']['start_inventory']
-        self._risk_level = self.p.Setup['CommonTraderAgent']['risk_level']
-        self._sell_probability = self.p.Setup['CommonTraderAgent']['sell_probability']
-        self._price_variance = self.p.Setup['CommonTraderAgent']['price_variance']
+        self._money = self.p['CommonTraderAgent_start_money']
+        self._inventory = self.p['CommonTraderAgent_start_inventory']
+        self._risk_level = self.p['CommonTraderAgent_risk_level']
+        self._sell_probability = self.p['CommonTraderAgent_sell_probability']
+        self._price_variance = self.p['CommonTraderAgent_price_variance']
 
     def make_decision(self):
         market_env = self.model.market_env

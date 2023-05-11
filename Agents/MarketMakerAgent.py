@@ -18,13 +18,13 @@ class MarketMakerAgent(BaseAgent):
 
     def setup(self):
         self._money = 0
-        self._inventory = self.p.Setup['MarketMakerAgent']['start_inventory']
-        self._risk_level = self.p.Setup['MarketMakerAgent']['risk_level']
+        self._inventory = self.p.Setup['MarketMakerAgent_start_inventory']
+        self._risk_level = self.p.Setup['MarketMakerAgent_risk_level']
 
     def make_decision(self):
         market_env = self.model.market_env
         if -self._risk_level <= self._inventory <= self._risk_level:
-            new_inventory = self._inventory + uniform.rvs(loc=-5, scale=10)
+            new_inventory = -self._inventory #+ uniform.rvs(loc=-5, scale=10)
             if new_inventory > 0:
                 bid_size = self._risk_level - self._inventory
                 offer_size = -new_inventory + self._risk_level
@@ -36,8 +36,10 @@ class MarketMakerAgent(BaseAgent):
             offset = (best_offer - best_bid) * f(self._inventory / self._risk_level)
             bid_price = best_bid - offset
             offer_price = best_offer - offset
-            market_env.add_order(bid_price, bid_size, OperationTypes.BUY, self)
-            market_env.add_order(offer_price, offer_size, OperationTypes.SELL, self)
+            if bid_price > 0:
+                market_env.add_order(bid_price, bid_size, OperationTypes.BUY, self)
+            if offer_price > 0:
+                market_env.add_order(offer_price, offer_size, OperationTypes.SELL, self)
         else:
             if self._inventory < 0:
                 market_env.add_order(1e20, abs(self._inventory) - self._risk_level * 0.99, OperationTypes.BUY, self)

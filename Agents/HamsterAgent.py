@@ -15,11 +15,11 @@ class HamsterAgent(BaseAgent):
     """
 
     def setup(self):
-        self._money = self.p.Setup['HamsterAgent']['start_money']
-        self._inventory = self.p.Setup['HamsterAgent']["start_inventory"]
-        self._risk_level = self.p.Setup['HamsterAgent']['risk_level']
-        self._interpolate_degree = self.p.Setup['HamsterAgent']['interpolate_degree']
-        self._history_depth = self.p.Setup['HamsterAgent']['history_depth']
+        self._money = self.p.Setup['HamsterAgent_start_money']
+        self._inventory = self.p.Setup['HamsterAgent_start_inventory']
+        self._risk_level = self.p.Setup['HamsterAgent_risk_level']
+        self._interpolate_degree = self.p.Setup['HamsterAgent_interpolate_degree']
+        self._history_depth = self.p.Setup['HamsterAgent_history_depth']
 
     def make_decision(self):
         market_env = self.model.market_env
