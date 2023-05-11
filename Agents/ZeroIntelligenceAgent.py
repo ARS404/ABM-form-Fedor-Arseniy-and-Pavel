@@ -28,6 +28,8 @@ class ZeroIntelligenceAgent(BaseAgent):
         if self._inventory < self._min_inventory and self._money < self._min_money or len(price_history) == 0:
             return
         order_price = price_history[-1] * uniform.rvs(loc=0.99, scale=0.02)
+        if order_price == 0:
+            return
         if self._inventory < self._min_inventory:
             order_type = OperationTypes.BUY
             order_size = (self._money ** uniform.rvs(scale=self._risk_level)) / order_price

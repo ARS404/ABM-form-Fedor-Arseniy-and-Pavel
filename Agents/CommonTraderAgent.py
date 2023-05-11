@@ -32,10 +32,14 @@ class CommonTraderAgent(BaseAgent):
         # order_price = lognorm.rvs(s=self._price_variance, scale=1.0) * price_history[-1]
         if (bernoulli.rvs(p=self._sell_probability) == 1 or self._money < 0) and self._inventory > 0:
             order_price = lognorm.rvs(s=self._price_variance, scale=1.1) * price_history[-1]
+            if order_price == 0:
+                return
             order_type = OperationTypes.SELL
             order_size = uniform.rvs(scale=self._risk_level) * self._inventory
         else:
             order_price = lognorm.rvs(s=self._price_variance, scale=0.9) * price_history[-1]
+            if order_price == 0:
+                return
             order_type = OperationTypes.BUY
             order_size = uniform.rvs(scale=self._risk_level) * self._money / order_price
         market_env.add_order(order_price, order_size, order_type, self, report=self.p.report)
