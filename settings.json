@@ -85,6 +85,9 @@
   "ExperimentalSetup": {
   "steps": 5000,
   "print_ETA": true,
+  "record_logs": true,
+  "draw_hists": false,
+  "draw_plots": false,
   "start_price": 1,
   "report": false,
   "record_results": true,
