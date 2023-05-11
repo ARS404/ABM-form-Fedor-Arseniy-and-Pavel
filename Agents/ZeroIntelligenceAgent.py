@@ -2,7 +2,7 @@ from Agents.BaseAgent import BaseAgent
 from scipy.stats import uniform
 from scipy.stats import bernoulli
 
-from constants import OperationTypes
+from utils.Constants import OperationTypes
 
 
 class ZeroIntelligenceAgent(BaseAgent):

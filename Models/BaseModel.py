@@ -1,4 +1,5 @@
 import datetime
+import os.path
 
 import agentpy as ap
 import numpy as np
@@ -6,6 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from MarketEnv.MarketEnv import MarketEnv
+from utils.AgentMapping import AGENT_FROM_STR
 
 
 class BaseModel(ap.Model):
@@ -26,6 +28,18 @@ class BaseModel(ap.Model):
             if cnt == 0:
                 continue
             self.agents[tp] = ap.AgentList(self, cnt, tp)
+        if self.p.record_logs:
+            name = sum(map(lambda x: str(x), self.p.Agents.values()))
+            self.__log_file = os.path.join('run_results', 'logs', self.p.model_name, f"{name}.log")
+            with open(self.__log_file, 'w') as f:
+                f.write("Start logging\n"
+                        "Model successfully setup\n"
+                        "Running configuration:\n")
+                f.flush()
+                for agent in sorted(self.p.Setup.keys()):
+                    f.write(f"\t {agent} count is {self.p.Agents[AGENT_FROM_STR[agent]]}\n")
+                f.write("Extracted prices:\n")
+                f.flush()
 
     def step(self):
         for agent_sublist in self.agents.values():
@@ -62,7 +76,11 @@ class BaseModel(ap.Model):
         self.market_env.order_book.clean()
         if self.p.print_ETA:
             mean_time = (datetime.datetime.now() - self.start_time) / self.t
-            print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t)}", end='')
+            print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t) * 1000} ms", end='')
+        if self.p.record_logs:
+            with open(self.__log_file, 'a') as f:
+                f.write(f"\titer {self.t}: price = {price}\n")
+                f.flush()
 
     def end(self):
         if self.p.record_results:
@@ -70,19 +88,24 @@ class BaseModel(ap.Model):
             u = list()
             for i in range(20, len(prices) - 1):
                 u.append(np.log(prices[i + 1] / prices[i]))
+            if self.p.draw_hists or self.p.draw_plots:
+                template_file = os.path.join('run_results', self.p.model_name, self.p.steps)
             if self.p.draw_hists:
                 figure1 = plt.figure(1, figsize=(20, 10))
                 plt.hist(u, 500, density=True)
-                plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_hist.png")
+                plt.savefig(f"{template_file}_price_hist.png")
                 plt.close(figure1)
                 figure2 = plt.figure(1, figsize=(20, 10))
                 plt.hist(u, 500, density=True)
                 plt.yscale('log')
-                plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_hist_log.png")
+                plt.savefig(f"{template_file}_price_hist_log.png")
                 plt.close(figure2)
             if self.p.draw_plots:
                 figure3 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
                 plt.plot(prices, "bo-")
-                plt.savefig(f"run_results/{self.p.model_name}/{self.p.steps}_price_plot.png")
+                plt.savefig(f"{template_file}_price_plot.png")
                 plt.close(figure3)
-
+            if self.p.record_logs:
+                with open(self.__log_file, 'a') as f:
+                    f.write(f"Model successfully finished at {(datetime.datetime.now() - self.start_time) * 1000} ms")
+                    f.flush()

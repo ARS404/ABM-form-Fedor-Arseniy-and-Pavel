@@ -1,7 +1,6 @@
 from Agents.BaseAgent import BaseAgent
-from constants import OperationTypes
+from utils.Constants import OperationTypes
 from scipy.stats import norm
-from scipy.stats import uniform
 from sklearn.linear_model import LinearRegression
 import numpy as np
 

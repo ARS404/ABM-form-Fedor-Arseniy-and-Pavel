@@ -1,7 +1,7 @@
 import numpy as np
 
-from constants import OperationTypes
-import numpy
+from utils.Constants import OperationTypes
+
 
 class OrderBookException(Exception):
     def __init__(self, message="You have to send some error message"):

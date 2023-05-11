@@ -1,5 +1,5 @@
 from Agents.BaseAgent import BaseAgent
-from constants import OperationTypes
+from utils.Constants import OperationTypes
 from scipy.stats import uniform
 
 
