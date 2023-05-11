@@ -47,10 +47,10 @@ class OrderBook(object):
             print(self.data[-1])
 
     def buyers_at_price(self, price):
-        return list(filter(lambda x: (x.operation_type == OperationTypes.BUY) and (x.price <= price), self.data))
+        return list(filter(lambda x: (x.operation_type == OperationTypes.BUY) and (x.price >= price), self.data))
 
     def sellers_at_price(self, price):
-        return list(filter(lambda x: (x.operation_type == OperationTypes.SELL) and (x.price >= price), self.data))
+        return list(filter(lambda x: (x.operation_type == OperationTypes.SELL) and (x.price <= price), self.data))
 
     def get_price(self):
         buys = list(filter(lambda x: x.operation_type == OperationTypes.BUY, self.data))
