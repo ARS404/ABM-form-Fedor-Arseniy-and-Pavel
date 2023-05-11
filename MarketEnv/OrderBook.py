@@ -94,11 +94,11 @@ class OrderBook(object):
         offer_price = 0
         bid_price = prices[-1] + 1
         for i in range(len(buys)):
-            if buys[i].price >= best_price:
-                break
             bid_price = buys[i].price
-        for i in range(len(sells)):
-            if sells[i].price <= best_price:
+            if buys[i].price < best_price:
                 break
+        for i in range(len(sells)):
             offer_price = sells[i].price
+            if sells[i].price > best_price:
+                break
         return best_price, offer_price, bid_price
