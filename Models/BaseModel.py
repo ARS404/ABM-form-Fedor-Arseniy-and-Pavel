@@ -99,11 +99,11 @@ class BaseModel(ap.Model):
     def end(self):
         if self.p.draw_hists or self.p.draw_plots:
             prices = self.market_env.market_history.get_prices(limit=None)
-            u = list()
-            for i in range(20, len(prices) - 1):
-                u.append(np.log(prices[i + 1] / prices[i]))
-            template_file = os.path.join('run_results', self.p.model_name, self.p.steps)
+            template_file = os.path.join('run_results', self.p.model_name, str(self.p.steps))
             if self.p.draw_hists:
+                u = list()
+                for i in range(20, len(prices) - 1):
+                    u.append(np.log(prices[i + 1] / prices[i]))
                 figure1 = plt.figure(1, figsize=(20, 10))
                 plt.hist(u, 500, density=True)
                 plt.savefig(f"{template_file}_price_hist.png")
