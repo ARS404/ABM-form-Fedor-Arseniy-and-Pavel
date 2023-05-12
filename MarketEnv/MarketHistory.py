@@ -46,8 +46,12 @@ class MarketHistory(object):
             return deepcopy(self.deals_prices[-1 * min(limit, len(self.deals_prices)):])
         return deepcopy(self.deals_prices)
 
-    def get_bid_prices(self):
-        return self.bid_prices
+    def get_bid_prices(self, limit=2):
+        if limit is not None:
+            return deepcopy(self.bid_prices[-1 * min(limit, len(self.bid_prices)):])
+        return deepcopy(self.bid_prices)
 
-    def get_offer_prices(self):
-        return self.offer_prices
+    def get_offer_prices(self, limit=2):
+        if limit is not None:
+            return deepcopy(self.offer_prices[-1 * min(limit, len(self.offer_prices)):])
+        return deepcopy(self.offer_prices)
