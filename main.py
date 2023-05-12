@@ -39,7 +39,7 @@ def run_experiment(setup_name, v_min, v_max, n_jobs, display=False):
     samples = prepare_samples()
     experiment = Experiment(BaseModel, sample=samples, iterations=1)
     # TODO: try different backends
-    experiment.run(n_jobs=n_jobs, display=display, backend='threading')
+    experiment.run(n_jobs=n_jobs, display=display)
     print(f"\nFinish experiment run with setup {setup_name}")
 
 
