@@ -63,6 +63,10 @@ class BaseModel(ap.Model):
         if self.t == 0:
             return
         price, offer_price, bid_price = self.market_env.get_price()
+        if self.t == 1000:
+            price *= 2
+            bid_price *= 2
+            offer_price *= 2
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
@@ -115,6 +119,9 @@ class BaseModel(ap.Model):
                 plt.close(figure2)
             if self.p.draw_plots:
                 figure3 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
+                if max(prices) > 10000:
+                    plt.yscale('log')
+                plt.axvline(x=1000)
                 plt.plot(prices, "bo-")
                 plt.savefig(f"{template_file}_price_plot.png")
                 plt.close(figure3)
