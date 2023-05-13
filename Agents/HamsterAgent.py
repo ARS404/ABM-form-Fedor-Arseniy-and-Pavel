@@ -29,7 +29,7 @@ class HamsterAgent(BaseAgent):
         x = np.vander(range(self._history_depth), self._interpolate_degree)
         reg = LinearRegression().fit(x, price_history)
         order_price = reg.predict(np.vander([self._history_depth], self._interpolate_degree))[0]
-        if order_price <= 0:
+        if order_price <= 1e-6:
             return
         if order_price >= price_history[-1]:
             order_type = OperationTypes.SELL

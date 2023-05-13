@@ -82,8 +82,8 @@
     }
   }
 },
-  "ExperimentalSetup": {
-    "steps": 2000,
+  "ExperimentalSetup_BLOW_WITHOUT_SHOCK": {
+    "steps": 2500,
     "print_ETA": true,
     "record_logs": true,
     "draw_hists": false,
@@ -92,30 +92,66 @@
     "report": false,
     "model_name": "Experiments",
 
-    "HamsterAgent_count": 50,
-    "ZeroIntelligenceAgent_count": 50,
-    "CommonTraderAgent_count": 50,
-    "MarketMakerAgent_count": 20,
+    "HamsterAgent_count": 5,
+    "ZeroIntelligenceAgent_count": 5,
+    "CommonTraderAgent_count": 5,
+    "MarketMakerAgent_count": 5,
 
-    "HamsterAgent_start_money": 1000.0,
-    "HamsterAgent_start_inventory": 10.0,
+    "HamsterAgent_start_money": 10000.0,
+    "HamsterAgent_start_inventory": 100.0,
     "HamsterAgent_risk_level": 0.7,
     "HamsterAgent_interpolate_degree": 3,
     "HamsterAgent_history_depth": 5,
 
-    "ZeroIntelligenceAgent_start_money": 1000.0,
-    "ZeroIntelligenceAgent_start_inventory": 10.0,
+    "ZeroIntelligenceAgent_start_money": 10000.0,
+    "ZeroIntelligenceAgent_start_inventory": 100.0,
     "ZeroIntelligenceAgent_risk_level": 0.7,
     "ZeroIntelligenceAgent_min_money": 0.0,
     "ZeroIntelligenceAgent_min_inventory": 0.0,
 
-    "CommonTraderAgent_start_money": 1000.0,
-    "CommonTraderAgent_start_inventory": 10.0,
+    "CommonTraderAgent_start_money": 10000.0,
+    "CommonTraderAgent_start_inventory": 100.0,
     "CommonTraderAgent_risk_level": 0.7,
     "CommonTraderAgent_sell_probability": 0.5,
     "CommonTraderAgent_price_variance": 1,
 
-    "MarketMakerAgent_start_inventory": 100.0,
+    "MarketMakerAgent_start_inventory": 250.0,
     "MarketMakerAgent_risk_level": 500.0
+},
+  "ExperimentalSetup": {
+    "steps": 10000,
+    "print_ETA": true,
+    "record_logs": true,
+    "draw_hists": false,
+    "draw_plots": true,
+    "start_price": 100,
+    "report": false,
+    "model_name": "Experiments",
+
+    "HamsterAgent_count": 10,
+    "ZeroIntelligenceAgent_count": 10,
+    "CommonTraderAgent_count": 10,
+    "MarketMakerAgent_count": 7,
+
+    "HamsterAgent_start_money": 10000.0,
+    "HamsterAgent_start_inventory": 100.0,
+    "HamsterAgent_risk_level": 0.7,
+    "HamsterAgent_interpolate_degree": 3,
+    "HamsterAgent_history_depth": 5,
+
+    "ZeroIntelligenceAgent_start_money": 10000.0,
+    "ZeroIntelligenceAgent_start_inventory": 100.0,
+    "ZeroIntelligenceAgent_risk_level": 0.7,
+    "ZeroIntelligenceAgent_min_money": 0.0,
+    "ZeroIntelligenceAgent_min_inventory": 0.0,
+
+    "CommonTraderAgent_start_money": 10000.0,
+    "CommonTraderAgent_start_inventory": 100.0,
+    "CommonTraderAgent_risk_level": 0.7,
+    "CommonTraderAgent_sell_probability": 0.5,
+    "CommonTraderAgent_price_variance": 1,
+
+    "MarketMakerAgent_start_inventory": 500.0,
+    "MarketMakerAgent_risk_level": 1000.0
 }
 }

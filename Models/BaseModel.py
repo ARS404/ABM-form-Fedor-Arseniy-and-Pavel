@@ -1,11 +1,12 @@
 import datetime
 import os.path
+from copy import deepcopy
 
 import agentpy as ap
 import numpy as np
 
 from matplotlib import pyplot as plt
-
+from utils.Constants import OperationTypes
 from MarketEnv.MarketEnv import MarketEnv
 from utils.AgentMapping import AGENT_FROM_STR, AGENT_NAMES_LIST
 
@@ -39,6 +40,13 @@ class BaseModel(ap.Model):
         for agent_name in self.used_agents:
             cnt = self.p.__getattr__(f"{agent_name}_count")
             self.agents[AGENT_FROM_STR[agent_name]] = ap.AgentList(self, cnt, AGENT_FROM_STR[agent_name])
+            for agent in self.agents[AGENT_FROM_STR[agent_name]]:
+                if agent_name == 'MarketMaker':
+                    self.market_env.order_book.sell_data[agent] = [None] * 10
+                    self.market_env.order_book.buy_data[agent] = [None] * 10
+                else:
+                    self.market_env.order_book.sell_data[agent] = [None]
+                    self.market_env.order_book.buy_data[agent] = [None]
         if self.p.record_logs:
             name = ""
             for x in self.used_agents:
@@ -63,10 +71,16 @@ class BaseModel(ap.Model):
         if self.t == 0:
             return
         price, offer_price, bid_price = self.market_env.get_price()
-        if self.t == 1000:
-            price *= 2
-            bid_price *= 2
-            offer_price *= 2
+        if self.t == 4000:
+            price *= 1.2
+            bid_price *= 1.2
+            offer_price *= 1.2
+        # if self.t == 1500:
+        #     price /= 1.05
+        #     bid_price /= 1.05
+        #     offer_price /= 1.05
+        if price <= 1e-6:
+            price = 1e-6
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
@@ -81,16 +95,24 @@ class BaseModel(ap.Model):
             buy_of = buy_offers[buy_ind]
 
             if sell_of.quantity >= buy_of.quantity:
-                sell_of.quantity -= buy_of.quantity
+                # sell_offers[sell_ind].quantity -= buy_of.quantity
                 total_quantity = buy_of.quantity
+                ind = self.market_env.order_book.sell_data[sell_of.trader].index(sell_of)
+                self.market_env.order_book.sell_data[sell_of.trader][ind].quantity -= buy_of.quantity
+                ind = self.market_env.order_book.buy_data[buy_of.trader].index(buy_of)
+                self.market_env.order_book.buy_data[buy_of.trader][ind] = None
                 buy_ind += 1
             else:
-                buy_of.quantity -= sell_of.quantity
+                # buy_offers[buy_ind].quantity -= sell_of.quantity
                 total_quantity = sell_of.quantity
+                ind = self.market_env.order_book.buy_data[buy_of.trader].index(buy_of)
+                self.market_env.order_book.buy_data[buy_of.trader][ind].quantity -= sell_of.quantity
+                ind = self.market_env.order_book.sell_data[sell_of.trader].index(sell_of)
+                self.market_env.order_book.sell_data[sell_of.trader][ind] = None
                 sell_ind += 1
-            sell_of.trader.change_balance(total_quantity * price, -1 * total_quantity)
-            buy_of.trader.change_balance(-1 * total_quantity * price, total_quantity)
-            self.market_env.market_history.add_deal(sell_of.trader, buy_of.trader, total_quantity)
+            sell_of.trader.make_deal(price, total_quantity, OperationTypes.SELL)
+            buy_of.trader.make_deal(price, total_quantity, OperationTypes.BUY)
+            self.market_env.market_history.add_deal(buy_of.trader, sell_of.trader, total_quantity)
         self.market_env.order_book.clean()
         if self.p.print_ETA:
             mean_time = (datetime.datetime.now() - self.start_time) / self.t
@@ -98,6 +120,13 @@ class BaseModel(ap.Model):
         if self.p.record_logs:
             with open(self.__log_file, 'a') as f:
                 f.write(f"\titer {self.t}: price = {price}\n")
+                f.write(f"\titer {self.t}: bid_price = {bid_price}\n")
+                f.write(f"\titer {self.t}: offer_price = {offer_price}\n")
+                if price == 1e-6:
+                    for order in sell_offers:
+                        f.write(f"{order.__str__()}\n")
+                for deal in self.market_env.market_history.deals[-1]:
+                    f.write(f"{deal.__str__()}\n")
                 f.flush()
 
     def end(self):
@@ -121,8 +150,8 @@ class BaseModel(ap.Model):
                 figure3 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
                 if max(prices) > 10000:
                     plt.yscale('log')
-                plt.axvline(x=1000)
-                plt.plot(prices, "bo-")
+                # plt.axvline(x=1000)
+                plt.plot(prices[20:], "bo-")
                 plt.savefig(f"{template_file}_price_plot.png")
                 plt.close(figure3)
         if self.p.record_logs:
