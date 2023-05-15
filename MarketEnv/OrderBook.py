@@ -123,9 +123,11 @@ class OrderBook(object):
                 best_quantity = current_quantity
                 best_price = prices[i]
             else:
-                if current_quantity > best_quantity:
+                if current_quantity >= best_quantity:
                     best_quantity = current_quantity
                     best_price = prices[i]
+        if best_price == float('inf'):
+            best_price = prices[-2]
         offer_price = 0
         bid_price = prices[-1] + 1
         for i in range(len(buys)):
