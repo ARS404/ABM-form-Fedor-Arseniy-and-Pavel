@@ -112,7 +112,7 @@ class BaseModel(ap.Model):
             buy_of = buy_offers[buy_ind]
 
             if sell_of.quantity >= buy_of.quantity:
-                sell_offers[sell_ind].quantity -= buy_of.quantity
+                sell_of.quantity -= buy_of.quantity
                 total_quantity = buy_of.quantity
                 ind = self.t - sell_of.time
                 self.market_env.order_book.sell_data[sell_of.trader][ind].quantity -= buy_of.quantity
@@ -120,7 +120,7 @@ class BaseModel(ap.Model):
                 self.market_env.order_book.buy_data[buy_of.trader][ind] = None
                 buy_ind += 1
             else:
-                buy_offers[buy_ind].quantity -= sell_of.quantity
+                buy_of.quantity -= sell_of.quantity
                 total_quantity = sell_of.quantity
                 ind = self.t - buy_of.time
                 self.market_env.order_book.buy_data[buy_of.trader][ind].quantity -= sell_of.quantity

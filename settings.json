@@ -38,6 +38,7 @@
     "MarketMakerAgent_risk_level": 500.0
 },
   "ExperimentalSetup": {
+    "seed": 100,
     "steps": 10000,
     "print_ETA": true,
     "record_logs": true,

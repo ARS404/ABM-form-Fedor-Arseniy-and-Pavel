@@ -43,17 +43,17 @@ class OrderBook(object):
         self.sell_data = dict()
         self.buy_data = dict()
 
+    @staticmethod
+    def _clean_book(book):
+        for agent in book.keys():
+            book[agent] = [None] + book[agent]
+            if book[agent][-1] is not None:
+                book[agent][-1].trader.close_deal(book[agent][-1].quantity, book[agent][-1].operation_type)
+            book[agent].pop()
+
     def clean(self):
-        for k, v in self.buy_data.items():
-            v = [None] + v
-            if v[-1] is not None:
-                v[-1].trader.close_deal(v[-1].quantity, v[-1].operation_type)
-            v.pop()
-        for k, v in self.sell_data.items():
-            v = [None] + v
-            if v[-1] is not None:
-                v[-1].trader.close_deal(v[-1].quantity, v[-1].operation_type)
-            v.pop()
+        self._clean_book(self.buy_data)
+        self._clean_book(self.sell_data)
 
     def add_order(self, price, quantity, operation_type, trader, time, report=False):
         if operation_type is OperationTypes.BUY:
