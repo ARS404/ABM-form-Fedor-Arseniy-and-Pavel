@@ -13,10 +13,10 @@ AGENT_FROM_STR = {
     "ZeroIntelligenceAgent": ZeroIntelligenceAgent,
 }
 
-AGENT_NAMES_LIST = [
+AGENT_NAMES_LIST = sorted([
     "CommonTraderAgent",
     "HamsterAgent",
     "MarketMakerAgent",
     "TargetWealthAgent",
     "ZeroIntelligenceAgent",
-]
+])

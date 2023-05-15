@@ -9,6 +9,12 @@ from matplotlib import pyplot as plt
 from MarketEnv.MarketEnv import MarketEnv
 from utils.AgentMapping import AGENT_FROM_STR, AGENT_NAMES_LIST
 
+# # TODO: fix this shit
+# models_total_cnt = (10000 + 11) // 12
+# models_inited = 0
+# models_finished = 0
+# start_time = None
+
 
 class BaseModel(ap.Model):
     """
@@ -18,6 +24,14 @@ class BaseModel(ap.Model):
     """
 
     def setup(self):
+        # # TODO: fix this shit
+        # global start_time, models_inited, models_total_cnt
+        # if models_inited == 0:
+        #     start_time = datetime.datetime.now()
+        #     # print(f'\rset start_time to {start_time}', end='')
+        # models_inited += 1
+        # # print(f'\rsetup model number {models_inited} of {models_total_cnt}', end='')
+
         self.start_time = datetime.datetime.now()
         self.market_env = MarketEnv()
         self.market_env.market_history.add_deal_price(self.p.start_price)
@@ -35,25 +49,27 @@ class BaseModel(ap.Model):
                 continue
             self.used_agents.append(agent_name)
         self.used_agents = sorted(self.used_agents)
+        self.agents_count = {agent_name: self.p.__getattr__(f"{agent_name}_count") for agent_name in self.used_agents}
 
         for agent_name in self.used_agents:
             cnt = self.p.__getattr__(f"{agent_name}_count")
             self.agents[AGENT_FROM_STR[agent_name]] = ap.AgentList(self, cnt, AGENT_FROM_STR[agent_name])
         if self.p.record_logs:
-            name = ""
-            for x in self.used_agents:
-                name += str(self.p.__getattr__(f"{x}_count"))
-            self.__log_file = os.path.join('run_results', 'logs', self.p.model_name, f"{name}.log")
-            with open(self.__log_file, 'w') as f:
+            name = '_'.join(map(lambda x: str(self.agents_count[x]), self.used_agents))
+            # name = '_'.join(map(lambda x: str(self.p.__getattr__(f"{x}_count")), self.used_agents))
+            log_path = os.path.join('run_results', 'logs', self.p.model_name, f"{name}.log")
+            with open(log_path, 'w') as f:
                 f.write("Start logging\n"
                         "Model successfully setup\n"
                         "Running configuration:\n")
                 f.flush()
-                for agent_name in self.used_agents:
-                    f.write(f"\t {agent_name} count is {self.p.__getattr__(f'{agent_name}_count')}\n")
-                f.write(f"\t model steps: {self.p.steps}\n")
-                f.write("Extracted prices:\n")
-                f.flush()
+            self.__log_file = open(log_path, 'a')
+            for agent_name in self.used_agents:
+                # self.__log_file.write(f"\t {agent_name} count is {self.p.__getattr__(f'{agent_name}_count')}\n")
+                self.__log_file.write(f"\t {agent_name} count is {self.agents_count[agent_name]}\n")
+            self.__log_file.write(f"\t model steps: {self.p.steps}\n")
+            self.__log_file.write("Extracted prices:\n")
+            self.__log_file.flush()
 
     def step(self):
         for agent_sublist in self.agents.values():
@@ -64,9 +80,9 @@ class BaseModel(ap.Model):
             return
         price, offer_price, bid_price = self.market_env.get_price()
         if self.t == 1000:
-            price *= 2
-            bid_price *= 2
-            offer_price *= 2
+            price *= 1.05
+            bid_price *= 1.05
+            offer_price *= 1.05
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
@@ -94,11 +110,11 @@ class BaseModel(ap.Model):
         self.market_env.order_book.clean()
         if self.p.print_ETA:
             mean_time = (datetime.datetime.now() - self.start_time) / self.t
-            print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t)} ns", end='')
+            print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t)}",
+                  end='')
         if self.p.record_logs:
-            with open(self.__log_file, 'a') as f:
-                f.write(f"\titer {self.t}: price = {price}\n")
-                f.flush()
+            self.__log_file.write(f"\titer {self.t}: price = {price}\n")
+            self.__log_file.flush()
 
     def end(self):
         if self.p.draw_hists or self.p.draw_plots:
@@ -121,11 +137,21 @@ class BaseModel(ap.Model):
                 figure3 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
                 if max(prices) > 10000:
                     plt.yscale('log')
-                plt.axvline(x=1000)
+                plt.axvline(x=1000, color='r')
+                title = ' '.join([f'{agent}: {str(self.agents_count[agent])}' for agent in self.used_agents]) + \
+                        f' steps: {self.p.steps}'
+                plt.title(title)
                 plt.plot(prices, "bo-")
-                plt.savefig(f"{template_file}_price_plot.png")
+                plt.show()
+                # plt.savefig(f"{template_file}_price_plot.png")
                 plt.close(figure3)
         if self.p.record_logs:
-            with open(self.__log_file, 'a') as f:
-                f.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time)} ns")
-                f.flush()
+            self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time)}")
+            self.__log_file.flush()
+            self.__log_file.close()
+        # # TODO: fix this shit
+        # global models_finished, models_total_cnt, start_time
+        # models_finished += 1
+        # print(f'\rfinish {models_finished} model(s) of {models_total_cnt} \t ETA: '
+        #       f'{(datetime.datetime.now() - start_time) / models_finished * (models_total_cnt - models_finished)}',
+        #       end='')

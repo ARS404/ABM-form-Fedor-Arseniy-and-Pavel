@@ -21,13 +21,14 @@ class ZeroIntelligenceAgent(BaseAgent):
         self._risk_level = self.p['ZeroIntelligenceAgent_risk_level']
         self._min_money = self.p['ZeroIntelligenceAgent_min_money']
         self._min_inventory = self.p['ZeroIntelligenceAgent_min_inventory']
+        self._noise = self.p['ZeroIntelligenceAgent_noise']
 
     def make_decision(self):
         market_env = self.model.market_env
         price_history = market_env.get_history().get_prices()
         if self._inventory < self._min_inventory and self._money < self._min_money or len(price_history) == 0:
             return
-        order_price = price_history[-1] * uniform.rvs(loc=0.99, scale=0.02)
+        order_price = price_history[-1] * uniform.rvs(loc=(1 - self._noise), scale=(2 * self._noise))
         if order_price == 0:
             return
         if self._inventory < self._min_inventory:
