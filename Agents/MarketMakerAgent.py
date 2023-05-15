@@ -25,6 +25,7 @@ class MarketMakerAgent(BaseAgent):
 
     def make_decision(self):
         market_env = self.model.market_env
+        price_history = market_env.get_history().get_prices()
         if -self._risk_level > self._inventory - self._offers:
             market_env.add_order(float('inf'), self._risk_level, OperationTypes.BUY, self,
                                  report=self.p.report)
@@ -33,7 +34,7 @@ class MarketMakerAgent(BaseAgent):
             market_env.add_order(0, self._risk_level, OperationTypes.SELL, self,
                                  report=self.p.report)
             return
-        new_inventory = -self._inventory #+ uniform.rvs(loc=-5, scale=10)
+        new_inventory = -self._inventory
         if new_inventory > 0:
             bid_size = self._risk_level - self._inventory
             offer_size = -new_inventory + self._risk_level
@@ -45,6 +46,9 @@ class MarketMakerAgent(BaseAgent):
         offset = (best_offer - best_bid) * f(self._inventory / self._risk_level)
         bid_price = best_bid - offset
         offer_price = best_offer - offset
+        # bid_size = min(bid_size, 2e8 / bid_price)
+        # offer_size = min(offer_size, 2e8 / offer_price)
+
         if bid_price > 0:
             market_env.add_order(bid_price, bid_size, OperationTypes.BUY, self, report=self.p.report)
             self._bids += bid_size
