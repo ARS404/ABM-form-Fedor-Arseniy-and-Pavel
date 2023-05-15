@@ -30,19 +30,5 @@ class MarketEnv(object):
         return self.order_book.get_price()
 
     def clear_order_from_trader(self, agent):
-        self.order_book.sell_data[agent] = 10 * [None]
-        self.order_book.buy_data[agent] = 10 * [None]
-
-
-def main():
-    # TODO: rewrite tests
-    m_env = MarketEnv()
-    for i in range(4, 6):
-        m_env.add_order((i**4 + 234) / (i**3 + 54), 2 * i, i)
-    for i in range(3, 5):
-        m_env.add_order((i**5 + 235) / (i**4 + 5), -3 * i, i)
-    m_env.get_price()
-
-
-if __name__ == '__main__':
-    main()
+        self.order_book.sell_data[agent] = agent.model.p.MM_order_live_time * [None]
+        self.order_book.buy_data[agent] = agent.model.p.MM_order_live_time * [None]
