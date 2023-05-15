@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 
 from utils.Constants import OperationTypes
@@ -24,13 +26,14 @@ class OrderBook(object):
         - get_price(self) :float: return the price set according to the order book
     """
     class Order:
-        def __init__(self, price, quantity, operation_type, trader):
+        def __init__(self, price, quantity, operation_type, trader, time):
             if operation_type not in OperationTypes:
                 raise OrderBookException("`quantity` value should be from `OperationTypes`")
             self.price = price
             self.quantity = quantity
             self.operation_type = operation_type
             self.trader = trader
+            self.time = time
 
         def __str__(self):
             return f"trader with id {self.trader.id} and type {type(self.trader)} send offer of type " \
@@ -41,24 +44,24 @@ class OrderBook(object):
         self.buy_data = dict()
 
     def clean(self):
-        for (k, v) in self.buy_data.items():
+        for k, v in self.buy_data.items():
             v = [None] + v
             if v[-1] is not None:
                 v[-1].trader.close_deal(v[-1].quantity, v[-1].operation_type)
             v.pop()
-        for (k, v) in self.sell_data.items():
+        for k, v in self.sell_data.items():
             v = [None] + v
             if v[-1] is not None:
                 v[-1].trader.close_deal(v[-1].quantity, v[-1].operation_type)
             v.pop()
 
-    def add_order(self, price, quantity, operation_type, trader, report=False):
+    def add_order(self, price, quantity, operation_type, trader, time, report=False):
         if operation_type is OperationTypes.BUY:
-            self.buy_data[trader][0] = (OrderBook.Order(price, quantity, operation_type, trader))
+            self.buy_data[trader][0] = (OrderBook.Order(price, quantity, operation_type, trader, time))
             if report:
                 print(self.buy_data[trader][0])
         else:
-            self.sell_data[trader][0] = (OrderBook.Order(price, quantity, operation_type, trader))
+            self.sell_data[trader][0] = (OrderBook.Order(price, quantity, operation_type, trader, time))
             if report:
                 print(self.sell_data[trader][0])
 
@@ -66,13 +69,13 @@ class OrderBook(object):
     def buyers_at_price(self, price):
         ret = list()
         for x in self.buy_data.values():
-            ret += list(filter(lambda y: y is not None and y.price >= price, x))
+            ret += list(map(lambda y: copy(y), list(y for y in x if y is not None and y.price >= price)))
         return ret
 
     def sellers_at_price(self, price):
         ret = list()
         for x in self.sell_data.values():
-            ret += list(filter(lambda y: y is not None and y.price <= price, x))
+            ret += list(map(lambda y: copy(y), list(y for y in x if y is not None and y.price <= price)))
         return ret
 
     def get_price(self):

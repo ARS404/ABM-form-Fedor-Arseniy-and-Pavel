@@ -56,7 +56,7 @@ class BaseModel(ap.Model):
             cnt = self.p.__getattr__(f"{agent_name}_count")
             self.agents[AGENT_FROM_STR[agent_name]] = ap.AgentList(self, cnt, AGENT_FROM_STR[agent_name])
             for agent in self.agents[AGENT_FROM_STR[agent_name]]:
-                if agent_name == 'MarketMaker':
+                if agent_name == 'MarketMakerAgent':
                     self.market_env.order_book.sell_data[agent] = [None] * 10
                     self.market_env.order_book.buy_data[agent] = [None] * 10
                 else:
@@ -99,7 +99,10 @@ class BaseModel(ap.Model):
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
         self.market_env.market_history.add_bid_price(bid_price)
-
+        mm_inv = self.agents[AGENT_FROM_STR['MarketMakerAgent']][0].get_inv()
+        self.market_env.market_history.mm_inventory[0].append(mm_inv[0])
+        self.market_env.market_history.mm_inventory[1].append(mm_inv[1])
+        self.market_env.market_history.mm_inventory[2].append(mm_inv[2])
         sell_offers = self.market_env.order_book.sellers_at_price(price)
         buy_offers = self.market_env.order_book.buyers_at_price(price)
         sell_ind = 0
@@ -109,19 +112,19 @@ class BaseModel(ap.Model):
             buy_of = buy_offers[buy_ind]
 
             if sell_of.quantity >= buy_of.quantity:
-                # sell_offers[sell_ind].quantity -= buy_of.quantity
+                sell_offers[sell_ind].quantity -= buy_of.quantity
                 total_quantity = buy_of.quantity
-                ind = self.market_env.order_book.sell_data[sell_of.trader].index(sell_of)
+                ind = self.t - sell_of.time
                 self.market_env.order_book.sell_data[sell_of.trader][ind].quantity -= buy_of.quantity
-                ind = self.market_env.order_book.buy_data[buy_of.trader].index(buy_of)
+                ind = self.t - buy_of.time
                 self.market_env.order_book.buy_data[buy_of.trader][ind] = None
                 buy_ind += 1
             else:
-                # buy_offers[buy_ind].quantity -= sell_of.quantity
+                buy_offers[buy_ind].quantity -= sell_of.quantity
                 total_quantity = sell_of.quantity
-                ind = self.market_env.order_book.buy_data[buy_of.trader].index(buy_of)
+                ind = self.t - buy_of.time
                 self.market_env.order_book.buy_data[buy_of.trader][ind].quantity -= sell_of.quantity
-                ind = self.market_env.order_book.sell_data[sell_of.trader].index(sell_of)
+                ind = self.t - sell_of.time
                 self.market_env.order_book.sell_data[sell_of.trader][ind] = None
                 sell_ind += 1
             sell_of.trader.make_deal(price, total_quantity, OperationTypes.SELL)
@@ -166,9 +169,19 @@ class BaseModel(ap.Model):
                         f' steps: {self.p.steps}'
                 plt.title(title)
                 plt.plot(prices, "bo-")
-                plt.show()
-                # plt.savefig(f"{template_file}_price_plot.png")
+                plt.savefig(f"{template_file}_price_plot.png")
                 plt.close(figure3)
+
+                figure4 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
+                title = ' '.join([f'{agent}: {str(self.agents_count[agent])}' for agent in self.used_agents]) + \
+                        f' steps: {self.p.steps}'
+                plt.title(title)
+                plt.plot(self.market_env.market_history.mm_inventory[0], label='inv')
+                plt.plot(self.market_env.market_history.mm_inventory[1], label='inv + bids')
+                plt.plot(self.market_env.market_history.mm_inventory[2], label='inv - offers')
+                plt.legend()
+                plt.savefig(f"{template_file}_mm_inventory.png")
+                plt.close(figure4)
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time)}")
             self.__log_file.flush()

@@ -25,14 +25,16 @@ class MarketMakerAgent(BaseAgent):
 
     def make_decision(self):
         market_env = self.model.market_env
-        price_history = market_env.get_history().get_prices()
+        # price_history = market_env.get_history().get_prices()
         if -self._risk_level > self._inventory - self._offers:
-            market_env.add_order(float('inf'), self._risk_level, OperationTypes.BUY, self,
+            market_env.add_order(float('inf'), self._risk_level, OperationTypes.BUY, self, self.model.t,
                                  report=self.p.report)
+            self._bids += self._risk_level
             return
         if self._inventory + self._bids > self._risk_level:
-            market_env.add_order(0, self._risk_level, OperationTypes.SELL, self,
+            market_env.add_order(0, self._risk_level, OperationTypes.SELL, self, self.model.t,
                                  report=self.p.report)
+            self._offers += self._risk_level
             return
         new_inventory = -self._inventory
         if new_inventory > 0:
@@ -50,10 +52,10 @@ class MarketMakerAgent(BaseAgent):
         # offer_size = min(offer_size, 2e8 / offer_price)
 
         if bid_price > 0:
-            market_env.add_order(bid_price, bid_size, OperationTypes.BUY, self, report=self.p.report)
+            market_env.add_order(bid_price, bid_size, OperationTypes.BUY, self, self.model.t, report=self.p.report)
             self._bids += bid_size
         if offer_price > 0:
-            market_env.add_order(offer_price, offer_size, OperationTypes.SELL, self, report=self.p.report)
+            market_env.add_order(offer_price, offer_size, OperationTypes.SELL, self, self.model.t, report=self.p.report)
             self._offers += offer_size
 
         return
@@ -73,3 +75,6 @@ class MarketMakerAgent(BaseAgent):
             self._offers -= quantity
         if op_type is OperationTypes.BUY:
             self._bids -= quantity
+
+    def get_inv(self):
+        return [self._inventory, self._inventory + self._bids, self._inventory - self._offers]

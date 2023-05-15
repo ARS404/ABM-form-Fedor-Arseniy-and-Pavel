@@ -34,9 +34,9 @@ class HamsterAgent(BaseAgent):
         if order_price >= price_history[-1]:
             order_type = OperationTypes.SELL
             order_size = min(max(norm.rvs(loc=self._inventory * self._risk_level), 0), self._inventory)
-            market_env.add_order(order_price, order_size, order_type, self, report=self.p.report)
+            market_env.add_order(order_price, order_size, order_type, self, self.model.t, report=self.p.report)
         else:
             order_type = OperationTypes.BUY
             order_size = min(max(norm.rvs(loc=self._money * self._risk_level), 0), self._money) / order_price
-            market_env.add_order(order_price, order_size, order_type, self, report=self.p.report)
+            market_env.add_order(order_price, order_size, order_type, self, self.model.t, report=self.p.report)
         return

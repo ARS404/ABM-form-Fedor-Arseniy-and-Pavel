@@ -25,6 +25,7 @@ class MarketHistory(object):
         self.offer_prices = list()
         self.bid_prices = list()
         self.deals_prices = list()
+        self.mm_inventory = list(([], [], []))
 
     def start_new_iter(self):
         self.deals.append(list())
