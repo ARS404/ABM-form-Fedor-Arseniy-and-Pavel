@@ -87,10 +87,10 @@ class BaseModel(ap.Model):
         if self.t == 0:
             return
         price, offer_price, bid_price = self.market_env.get_price()
-        if self.t == 4000:
-            price *= 1.2
-            bid_price *= 1.2
-            offer_price *= 1.2
+        # if self.t == 1000:
+        #     price *= 1.2
+        #     bid_price *= 1.2
+        #     offer_price *= 1.2
         # if self.t == 1500:
         #     price /= 1.05
         #     bid_price /= 1.05
@@ -139,8 +139,16 @@ class BaseModel(ap.Model):
             self.__log_file.write(f"\titer {self.t}: price = {price}\n")
             self.__log_file.write(f"\titer {self.t}: bid_price = {bid_price}\n")
             self.__log_file.write(f"\titer {self.t}: offer_price = {offer_price}\n")
-            for deal in self.market_env.market_history.deals[-1]:
-                self.__log_file.write(f"{deal.__str__()}\n")
+            # for deal in self.market_env.market_history.deals[-1]:
+                # self.__log_file.write(f"{deal.__str__()}\n")
+            for order in self.market_env.order_book.sell_data[self.agents[AGENT_FROM_STR['MarketMakerAgent']][0]]:
+                self.__log_file.write(f"{order.__str__()}, ")
+            self.__log_file.write("\n")
+            for order in self.market_env.order_book.buy_data[self.agents[AGENT_FROM_STR['MarketMakerAgent']][0]]:
+                self.__log_file.write(f"{order.__str__()}, ")
+            self.__log_file.write("\n")
+            self.__log_file.write(f"{self.agents[AGENT_FROM_STR['MarketMakerAgent']][0].get_inv()}\n")
+            self.__log_file.write("\n\n")
             self.__log_file.flush()
 
     def end(self):
@@ -177,8 +185,8 @@ class BaseModel(ap.Model):
                         f' steps: {self.p.steps}'
                 plt.title(title)
                 plt.plot(self.market_env.market_history.mm_inventory[0], label='inv')
-                plt.plot(self.market_env.market_history.mm_inventory[1], label='inv + bids')
-                plt.plot(self.market_env.market_history.mm_inventory[2], label='inv - offers')
+                # plt.plot(self.market_env.market_history.mm_inventory[1], label='inv + bids')
+                # plt.plot(self.market_env.market_history.mm_inventory[2], label='inv - offers')
                 plt.legend()
                 plt.savefig(f"{template_file}_mm_inventory.png")
                 plt.close(figure4)

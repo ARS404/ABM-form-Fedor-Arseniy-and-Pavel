@@ -37,7 +37,7 @@ class OrderBook(object):
 
         def __str__(self):
             return f"trader with id {self.trader.id} and type {type(self.trader)} send offer of type " \
-                   f"{self.operation_type} with price {self.price} and quantity {self.quantity}"
+                   f"{self.operation_type} with price {self.price} and quantity {self.quantity} on iteration {self.time}"
 
     def __init__(self):
         self.sell_data = dict()
@@ -64,6 +64,7 @@ class OrderBook(object):
             self.sell_data[trader][0] = (OrderBook.Order(price, quantity, operation_type, trader, time))
             if report:
                 print(self.sell_data[trader][0])
+
 
 
     def buyers_at_price(self, price):
@@ -117,15 +118,22 @@ class OrderBook(object):
         best_price = None
         best_quantity = None
         prices.reverse()
+        count = 0
         for i in range(len(prices)):
             current_quantity = min(total_buys_for_price[i], abs(total_sells_for_price[i]))
             if best_quantity is None:
                 best_quantity = current_quantity
                 best_price = prices[i]
+                count = 1
             else:
+                # if current_quantity == best_quantity:
+                #     count += 1
+                #     best_price += prices[i]
                 if current_quantity >= best_quantity:
                     best_quantity = current_quantity
                     best_price = prices[i]
+                    # count = 1
+        best_price /= count
         if best_price == float('inf'):
             best_price = prices[-2]
         offer_price = 0

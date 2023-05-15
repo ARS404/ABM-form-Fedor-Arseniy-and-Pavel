@@ -30,6 +30,10 @@ class MarketEnv(object):
     def get_price(self):
         return self.order_book.get_price()
 
+    def clear_order_from_trader(self, agent):
+        self.order_book.sell_data[agent] = 10 * [None]
+        self.order_book.buy_data[agent] = 10 * [None]
+
 
 
 

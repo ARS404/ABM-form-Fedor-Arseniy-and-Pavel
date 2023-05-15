@@ -25,31 +25,32 @@ class MarketMakerAgent(BaseAgent):
 
     def make_decision(self):
         market_env = self.model.market_env
-        # price_history = market_env.get_history().get_prices()
+        price_history = market_env.get_history().get_prices()
         if -self._risk_level > self._inventory - self._offers:
+            market_env.clear_order_from_trader(self)
+            self._bids = 0
+            self._offers = 0
             market_env.add_order(float('inf'), self._risk_level, OperationTypes.BUY, self, self.model.t,
                                  report=self.p.report)
             self._bids += self._risk_level
             return
-        if self._inventory + self._bids > self._risk_level:
+        if self._inventory > self._risk_level + self._bids:
+            market_env.clear_order_from_trader(self)
+            self._bids = 0
+            self._offers = 0
             market_env.add_order(0, self._risk_level, OperationTypes.SELL, self, self.model.t,
                                  report=self.p.report)
             self._offers += self._risk_level
             return
-        new_inventory = -self._inventory
-        if new_inventory > 0:
-            bid_size = self._risk_level - self._inventory
-            offer_size = -new_inventory + self._risk_level
-        else:
-            bid_size = self._risk_level + new_inventory
-            offer_size = self._inventory + self._risk_level
+        bid_size = self._risk_level - self._inventory
+        offer_size = self._inventory + self._risk_level
         best_offer = market_env.get_history().get_offer_prices()[-1]
         best_bid = market_env.get_history().get_bid_prices()[-1]
         offset = (best_offer - best_bid) * f(self._inventory / self._risk_level)
         bid_price = best_bid - offset
         offer_price = best_offer - offset
-        # bid_size = min(bid_size, 2e8 / bid_price)
-        # offer_size = min(offer_size, 2e8 / offer_price)
+        bid_price = max(min(bid_price, price_history[-1] * 1.1), price_history[-1] * 0.9)
+        offer_price = max(min(offer_price, price_history[-1] * 1.1), price_history[-1] * 0.9)
 
         if bid_price > 0:
             market_env.add_order(bid_price, bid_size, OperationTypes.BUY, self, self.model.t, report=self.p.report)
