@@ -8,7 +8,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from utils.Constants import OperationTypes
 from MarketEnv.MarketEnv import MarketEnv
-from utils.AgentMapping import AGENT_FROM_STR, AGENT_NAMES_LIST
+from utils.AgentMapping import AGENT_FROM_STR, AGENT_NAMES_LIST, AGENT_NAMES
 
 # # TODO: fix this shit
 # models_total_cnt = (10000 + 11) // 12
@@ -56,7 +56,7 @@ class BaseModel(ap.Model):
             cnt = self.p.__getattr__(f"{agent_name}_count")
             self.agents[AGENT_FROM_STR[agent_name]] = ap.AgentList(self, cnt, AGENT_FROM_STR[agent_name])
             for agent in self.agents[AGENT_FROM_STR[agent_name]]:
-                if agent_name == 'MarketMakerAgent':
+                if agent_name == AGENT_NAMES.MARKET_MAKER:
                     self.market_env.order_book.sell_data[agent] = [None] * 10
                     self.market_env.order_book.buy_data[agent] = [None] * 10
                 else:
@@ -179,6 +179,8 @@ class BaseModel(ap.Model):
                 plt.plot(self.market_env.market_history.mm_inventory[0], label='inv')
                 plt.plot(self.market_env.market_history.mm_inventory[1], label='inv + bids')
                 plt.plot(self.market_env.market_history.mm_inventory[2], label='inv - offers')
+                plt.axhline(y=self.p.MarketMakerAgent_risk_level, color='r')
+                plt.axhline(y=-1 * self.p.MarketMakerAgent_risk_level, color='r')
                 plt.legend()
                 plt.savefig(f"{template_file}_mm_inventory.png")
                 plt.close(figure4)

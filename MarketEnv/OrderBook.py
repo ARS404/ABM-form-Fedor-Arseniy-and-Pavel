@@ -3,7 +3,7 @@ from copy import copy
 import numpy as np
 
 from utils.Constants import OperationTypes
-from functools import reduce
+from utils.AgentMapping import AGENT_FROM_STR
 
 
 class OrderBookException(Exception):
@@ -46,6 +46,14 @@ class OrderBook(object):
     @staticmethod
     def _clean_book(book):
         for agent in book.keys():
+            # TODO: fix this shit (looks like we have to add live time to each order and rewrite a lot of staff)
+            if type(agent) == AGENT_FROM_STR['MarketMakerAgent']:
+                for ind, offer in enumerate(book[agent]):
+                    if offer is None:
+                        continue
+                    if offer.price in [0.0, float('inf')]:
+                        offer.trader.close_deal(offer.quantity, offer.operation_type)
+                        book[agent][ind] = None
             book[agent] = [None] + book[agent]
             if book[agent][-1] is not None:
                 book[agent][-1].trader.close_deal(book[agent][-1].quantity, book[agent][-1].operation_type)
