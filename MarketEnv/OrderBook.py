@@ -1,6 +1,7 @@
 import numpy as np
 
 from utils.Constants import OperationTypes
+from functools import reduce
 
 
 class OrderBookException(Exception):
@@ -36,28 +37,59 @@ class OrderBook(object):
                    f"{self.operation_type} with price {self.price} and quantity {self.quantity}"
 
     def __init__(self):
-        self.data = list()
+        self.sell_data = dict()
+        self.buy_data = dict()
 
     def clean(self):
-        self.data.clear()
+        for (k, v) in self.buy_data.items():
+            v = [None] + v
+            if v[-1] is not None:
+                v[-1].trader.close_deal(v[-1].quantity, v[-1].operation_type)
+            v.pop()
+        for (k, v) in self.sell_data.items():
+            v = [None] + v
+            if v[-1] is not None:
+                v[-1].trader.close_deal(v[-1].quantity, v[-1].operation_type)
+            v.pop()
 
     def add_order(self, price, quantity, operation_type, trader, report=False):
-        self.data.append(OrderBook.Order(price, quantity, operation_type, trader))
-        if report:
-            print(self.data[-1])
+        if operation_type is OperationTypes.BUY:
+            self.buy_data[trader][0] = (OrderBook.Order(price, quantity, operation_type, trader))
+            if report:
+                print(self.buy_data[trader][0])
+        else:
+            self.sell_data[trader][0] = (OrderBook.Order(price, quantity, operation_type, trader))
+            if report:
+                print(self.sell_data[trader][0])
+
 
     def buyers_at_price(self, price):
-        return list(filter(lambda x: (x.operation_type == OperationTypes.BUY) and (x.price >= price), self.data))
+        ret = list()
+        for x in self.buy_data.values():
+            ret += list(filter(lambda y: y is not None and y.price >= price, x))
+        return ret
 
     def sellers_at_price(self, price):
-        return list(filter(lambda x: (x.operation_type == OperationTypes.SELL) and (x.price <= price), self.data))
+        ret = list()
+        for x in self.sell_data.values():
+            ret += list(filter(lambda y: y is not None and y.price <= price, x))
+        return ret
 
     def get_price(self):
-        buys = list(filter(lambda x: x.operation_type == OperationTypes.BUY, self.data))
-        sells = list(filter(lambda x: x.operation_type == OperationTypes.SELL, self.data))
+        buys = list()
+        sells = list()
+        for x in self.buy_data.values():
+            buys += list(filter(lambda y: y is not None, x))
+        for x in self.sell_data.values():
+            sells += list(filter(lambda y: y is not None, x))
         buys.sort(key=lambda x: x.price, reverse=True)
         sells.sort(key=lambda x: x.price)
-        prices = np.unique(list(map(lambda x: x.price, self.data)))
+        prices = list()
+        for x in self.buy_data.values():
+            prices += [y.price for y in x if y is not None]
+        for x in self.sell_data.values():
+            prices += [y.price for y in x if y is not None]
+        prices = np.unique(prices)
         prices = list(prices)
         prices.sort()
         total_buys_for_price = [0.0 for i in range(len(prices))]

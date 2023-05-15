@@ -1,6 +1,7 @@
 from Agents.BaseAgent import BaseAgent
 from numpy.random import lognormal
 from scipy.stats import uniform
+from scipy.stats import lognorm
 from scipy.stats import bernoulli
 from utils.Constants import OperationTypes
 
@@ -30,15 +31,15 @@ class CommonTraderAgent(BaseAgent):
         price_history = market_env.get_history().get_prices()
         spread = (market_env.get_history().get_offer_prices()[-1] - market_env.get_history().get_bid_prices()[-1]) / price_history[-1]
         # order_price = price_history[-1] + uniform.rvs(loc=-0.05, scale=0.1)
-        # order_price = lognorm.rvs(s=self._price_variance, scale=1.0) * price_history[-1]
+        order_price = lognormal(-0.5, self._price_variance) * price_history[-1]
         if (bernoulli.rvs(p=self._sell_probability) == 1 or self._money < 0) and self._inventory > 0:
-            order_price = lognormal(-spread / 2, self._price_variance) * price_history[-1]
+            # order_price = lognormal(-spread / 2, self._price_variance) * price_history[-1]
             if order_price == 0:
                 return
             order_type = OperationTypes.SELL
             order_size = uniform.rvs(scale=self._risk_level) * self._inventory
         else:
-            order_price = lognormal(spread / 2, self._price_variance) * price_history[-1]
+            # order_price = lognormal(spread / 2, self._price_variance) * price_history[-1]
             if order_price == 0:
                 return
             order_type = OperationTypes.BUY

@@ -1,4 +1,5 @@
 import agentpy as ap
+from utils.Constants import OperationTypes
 
 
 class BaseAgent(ap.Agent):
@@ -21,4 +22,13 @@ class BaseAgent(ap.Agent):
         self._money += d_money
         self._inventory += d_invent
 
+    def make_deal(self, price, quantity, op_type):
+        if op_type is OperationTypes.SELL:
+            self._money += price * quantity
+            self._inventory -= quantity
+        if op_type is OperationTypes.BUY:
+            self._money -= price * quantity
+            self._inventory += quantity
 
+    def close_deal(self, quantity, op_type):
+        pass
