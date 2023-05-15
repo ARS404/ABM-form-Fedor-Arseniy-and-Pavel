@@ -1,5 +1,6 @@
 import datetime
 import os.path
+import random
 from copy import deepcopy
 
 import agentpy as ap
@@ -56,15 +57,14 @@ class BaseModel(ap.Model):
             cnt = self.p.__getattr__(f"{agent_name}_count")
             self.agents[AGENT_FROM_STR[agent_name]] = ap.AgentList(self, cnt, AGENT_FROM_STR[agent_name])
             for agent in self.agents[AGENT_FROM_STR[agent_name]]:
-                if agent_name == AGENT_NAMES.MARKET_MAKER:
-                    self.market_env.order_book.sell_data[agent] = [None] * 10
-                    self.market_env.order_book.buy_data[agent] = [None] * 10
+                if agent_name == AGENT_NAMES.MARKET_MAKER.value:
+                    self.market_env.order_book.sell_data[agent] = [None] * self.p.MM_order_live_time
+                    self.market_env.order_book.buy_data[agent] = [None] * self.p.MM_order_live_time
                 else:
                     self.market_env.order_book.sell_data[agent] = [None]
                     self.market_env.order_book.buy_data[agent] = [None]
         if self.p.record_logs:
             name = '_'.join(map(lambda x: str(self.agents_count[x]), self.used_agents))
-            # name = '_'.join(map(lambda x: str(self.p.__getattr__(f"{x}_count")), self.used_agents))
             log_path = os.path.join('run_results', 'logs', self.p.model_name, f"{name}.log")
             with open(log_path, 'w') as f:
                 f.write("Start logging\n"
@@ -99,12 +99,15 @@ class BaseModel(ap.Model):
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
         self.market_env.market_history.add_bid_price(bid_price)
-        mm_inv = self.agents[AGENT_FROM_STR['MarketMakerAgent']][0].get_inv()
-        self.market_env.market_history.mm_inventory[0].append(mm_inv[0])
-        self.market_env.market_history.mm_inventory[1].append(mm_inv[1])
-        self.market_env.market_history.mm_inventory[2].append(mm_inv[2])
+        for i in range(self.agents_count[AGENT_NAMES.MARKET_MAKER.value]):
+            mm_inv = self.agents[AGENT_FROM_STR['MarketMakerAgent']][i].get_inv()
+            self.market_env.market_history.mm_inventory[i][0].append(mm_inv[0])
+            self.market_env.market_history.mm_inventory[i][1].append(mm_inv[1])
+            self.market_env.market_history.mm_inventory[i][2].append(mm_inv[2])
         sell_offers = self.market_env.order_book.sellers_at_price(price)
         buy_offers = self.market_env.order_book.buyers_at_price(price)
+        random.shuffle(sell_offers)
+        random.shuffle(buy_offers)
         sell_ind = 0
         buy_ind = 0
         while sell_ind != len(sell_offers) and buy_ind != len(buy_offers):
@@ -176,11 +179,13 @@ class BaseModel(ap.Model):
                 title = ' '.join([f'{agent}: {str(self.agents_count[agent])}' for agent in self.used_agents]) + \
                         f' steps: {self.p.steps}'
                 plt.title(title)
-                plt.plot(self.market_env.market_history.mm_inventory[0], label='inv')
-                plt.plot(self.market_env.market_history.mm_inventory[1], label='inv + bids')
-                plt.plot(self.market_env.market_history.mm_inventory[2], label='inv - offers')
+                for i in range(self.agents_count[AGENT_NAMES.MARKET_MAKER.value]):
+                    plt.plot(self.market_env.market_history.mm_inventory[i][0], label=f'inv of {self.agents[AGENT_FROM_STR[AGENT_NAMES.MARKET_MAKER.value]][i].id}')
+                    # plt.plot(self.market_env.market_history.mm_inventory[i][1], label='inv + bids')
+                    # plt.plot(self.market_env.market_history.mm_inventory[i][2], label='inv - offers')
                 plt.axhline(y=self.p.MarketMakerAgent_risk_level, color='r', ls=':')
                 plt.axhline(y=-1 * self.p.MarketMakerAgent_risk_level, color='r', ls=':')
+                plt.axhline(y=0, color='g', ls=':')
                 plt.legend()
                 plt.savefig(f"{template_file}_mm_inventory.png")
                 plt.close(figure4)

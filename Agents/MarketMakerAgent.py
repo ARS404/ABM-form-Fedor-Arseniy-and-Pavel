@@ -23,22 +23,24 @@ class MarketMakerAgent(BaseAgent):
         self._inventory = self.p['MarketMakerAgent_start_inventory']
         self._risk_level = self.p['MarketMakerAgent_risk_level']
 
+    def _init_punic_state(self):
+        # next line is just debug output
+        # print(f"\nHello I`m Market Maker with id {self.id} and I fell into punic state on iteration {self.model.t}\n")
+        self.model.market_env.clear_order_from_trader(self)
+        self._bids = 0
+        self._offers = 0
+
     def make_decision(self):
         market_env = self.model.market_env
-        # price_history = market_env.get_history().get_prices()
-        if -self._risk_level > self._inventory - self._offers:
-            market_env.clear_order_from_trader(self)
-            self._bids = 0
-            self._offers = 0
+        if -self._risk_level > self._inventory:
+            self._init_punic_state()
             market_env.add_order(float('inf'), self._risk_level, OperationTypes.BUY, self, self.model.t,
                                  report=self.p.report)
             self._bids += self._risk_level
             return
 
-        if self._inventory + self._bids > self._risk_level:
-            market_env.clear_order_from_trader(self)
-            self._bids = 0
-            self._offers = 0
+        if self._inventory > self._risk_level:
+            self._init_punic_state()
             market_env.add_order(0, self._risk_level, OperationTypes.SELL, self, self.model.t,
                                  report=self.p.report)
             self._offers += self._risk_level
