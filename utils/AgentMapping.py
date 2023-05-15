@@ -1,4 +1,4 @@
-import enum
+from enum import Enum
 
 from Agents.CommonTraderAgent import CommonTraderAgent
 from Agents.HamsterAgent import HamsterAgent
@@ -24,7 +24,7 @@ AGENT_NAMES_LIST = sorted([
 ])
 
 
-class AGENT_NAMES(enum):
+class AGENT_NAMES(Enum):
     COMMON = "CommonTraderAgent"
     HAMSTER = "HamsterAgent"
     MARKET_MAKER = "MarketMakerAgent"

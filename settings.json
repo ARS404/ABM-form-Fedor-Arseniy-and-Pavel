@@ -39,7 +39,7 @@
 },
   "ExperimentalSetup": {
     "seed": 100,
-    "steps": 10000,
+    "steps": 1000,
     "print_ETA": true,
     "record_logs": true,
     "draw_hists": false,
@@ -48,9 +48,9 @@
     "report": false,
     "model_name": "Experiments",
 
-    "HamsterAgent_count": 5,
-    "ZeroIntelligenceAgent_count": 5,
-    "CommonTraderAgent_count": 5,
+    "HamsterAgent_count": 20,
+    "ZeroIntelligenceAgent_count": 20,
+    "CommonTraderAgent_count": 20,
     "MarketMakerAgent_count": 5,
 
     "HamsterAgent_start_money": 10000.0,
@@ -70,7 +70,7 @@
     "CommonTraderAgent_start_inventory": 100.0,
     "CommonTraderAgent_risk_level": 0.7,
     "CommonTraderAgent_sell_probability": 0.5,
-    "CommonTraderAgent_price_variance": 1,
+    "CommonTraderAgent_price_variance": 0.5,
 
     "MarketMakerAgent_start_inventory": 500.0,
     "MarketMakerAgent_risk_level": 1000.0

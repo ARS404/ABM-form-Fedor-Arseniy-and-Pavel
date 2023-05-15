@@ -27,11 +27,18 @@ class MarketMakerAgent(BaseAgent):
         market_env = self.model.market_env
         # price_history = market_env.get_history().get_prices()
         if -self._risk_level > self._inventory - self._offers:
+            market_env.clear_order_from_trader(self)
+            self._bids = 0
+            self._offers = 0
             market_env.add_order(float('inf'), self._risk_level, OperationTypes.BUY, self, self.model.t,
                                  report=self.p.report)
             self._bids += self._risk_level
             return
+
         if self._inventory + self._bids > self._risk_level:
+            market_env.clear_order_from_trader(self)
+            self._bids = 0
+            self._offers = 0
             market_env.add_order(0, self._risk_level, OperationTypes.SELL, self, self.model.t,
                                  report=self.p.report)
             self._offers += self._risk_level
@@ -77,4 +84,4 @@ class MarketMakerAgent(BaseAgent):
             self._bids -= quantity
 
     def get_inv(self):
-        return [self._inventory, self._inventory + self._bids, self._inventory - self._offers]
+        return self._inventory, self._inventory + self._bids, self._inventory - self._offers

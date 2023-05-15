@@ -73,7 +73,6 @@ class OrderBook(object):
             if report:
                 print(self.sell_data[trader][0])
 
-
     def buyers_at_price(self, price):
         ret = list()
         for x in self.buy_data.values():
