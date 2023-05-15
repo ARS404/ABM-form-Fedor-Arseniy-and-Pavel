@@ -1,0 +1,8 @@
+**/__pycache__
+
+tun_results/
+./.idea
+
+*.log
+*.png
+*.txt
