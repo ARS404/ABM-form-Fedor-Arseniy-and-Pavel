@@ -21,10 +21,10 @@ class BaseModel(ap.Model):
     def _prepare_agents(self):
         self.agents = {}
 
-        self.used_agent_types = []
-        self.used_agent_names = []
-        self.agent_names_count = dict()
-        self.agent_types_count = dict()
+        self._used_agent_types = []
+        self._used_agent_names = []
+        self._agent_names_count = dict()
+        self._agent_types_count = dict()
 
         for agent_name in AGENT_NAMES_LIST:
             try:
@@ -35,10 +35,10 @@ class BaseModel(ap.Model):
                 continue
             agent_type = AGENT_TYPE_FROM_NAME[agent_name]
 
-            self.used_agent_names.append(agent_name)
-            self.used_agent_types.append(agent_type)
-            self.agent_names_count[agent_name] = cnt
-            self.agent_types_count[agent_type] = cnt
+            self._used_agent_names.append(agent_name)
+            self._used_agent_types.append(agent_type)
+            self._agent_names_count[agent_name] = cnt
+            self._agent_types_count[agent_type] = cnt
 
             self.agents[agent_type] = ap.AgentList(self, cnt, agent_type)
             self.agents[agent_type].set_name(agent_name)
@@ -50,7 +50,7 @@ class BaseModel(ap.Model):
         self.market_env.market_history.add_offer_price(self.p.start_price)
         self.market_env.market_history.add_bid_price(self.p.start_price)
 
-        for agent_type in self.used_agent_types:
+        for agent_type in self._used_agent_types:
             for agent in self.agents[agent_type]:
                 if agent == AgentTypes.MM_TR:
                     self.market_env.order_book.sell_data[agent] = [None] * self.p.MM_order_live_time
@@ -60,13 +60,13 @@ class BaseModel(ap.Model):
                     self.market_env.order_book.buy_data[agent] = [None]
 
     def _prepare_statistic_collection(self):
-        self.panic_cases = [[] for i in range(self.p.steps + 1)]
-        self.agent_inventories = {}
-        self.market_volume_money = []
-        self.market_volume_product = []
+        self._panic_cases = [[] for i in range(self.p.steps + 1)]
+        self._agent_inventories = {}
+        self._market_volume_money = []
+        self._market_volume_product = []
 
     def _prepare_logging(self):
-        log_file_name = '_'.join(map(lambda x: str(self.agent_names_count[x]), self.used_agent_names))
+        log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
         log_path = os.path.join('run_results', 'logs', self.p.model_name, f"{log_file_name}.log")
         with open(log_path, 'w') as f:
             f.write("Start logging\n"
@@ -74,30 +74,30 @@ class BaseModel(ap.Model):
                     "Running configuration:\n")
             f.flush()
         self.__log_file = open(log_path, 'a')
-        for agent_name in self.used_agent_names:
+        for agent_name in self._used_agent_names:
             # self.__log_file.write(f"\t {agent_name} count is {self.p.__getattr__(f'{agent_name}_count')}\n")
-            self.__log_file.write(f"\t {agent_name} count is {self.agent_names_count[agent_name]}\n")
+            self.__log_file.write(f"\t {agent_name} count is {self._agent_names_count[agent_name]}\n")
         self.__log_file.write(f"\t model steps: {self.p.steps}\n")
         self.__log_file.write("Extracted prices:\n")
         self.__log_file.flush()
 
     def record_panic_state(self, agent):
-        self.panic_cases[self.t].append(agent)
+        self._panic_cases[self.t].append(agent)
 
     def add_to_inventory(self, agent, value):
-        if agent not in self.agent_inventories.keys():
-            self.agent_inventories[agent] = []
-        self.agent_inventories[agent].append(value)
+        if agent not in self._agent_inventories.keys():
+            self._agent_inventories[agent] = []
+        self._agent_inventories[agent].append(value)
 
     def setup(self):
-        self.start_time = datetime.datetime.now()
+        self._start_time = datetime.datetime.now()
         self._prepare_agents()
         self._prepare_market_env()
         self._prepare_logging()
         self._prepare_statistic_collection()
 
-        self._config_str = ' '.join([f'{agent_name}: {str(self.agent_names_count[agent_name])}'
-                                     for agent_name in self.used_agent_names]) + \
+        self._config_str = ' '.join([f'{agent_name}: {str(self._agent_names_count[agent_name])}'
+                                     for agent_name in self._used_agent_names]) + \
                            f' steps: {self.p.steps}'
 
     def step(self):
@@ -155,8 +155,8 @@ class BaseModel(ap.Model):
             buy_of.trader.make_deal(price, total_quantity, OperationTypes.BUY)
             self.market_env.market_history.add_deal(buy_of.trader, sell_of.trader, total_quantity)
 
-        self.market_volume_money.append(price * iter_total_quantity)
-        self.market_volume_product.append(iter_total_quantity)
+        self._market_volume_money.append(price * iter_total_quantity)
+        self._market_volume_product.append(iter_total_quantity)
 
         self.market_env.order_book.clean()
 
@@ -164,7 +164,7 @@ class BaseModel(ap.Model):
             self.add_to_inventory(agent, agent.get_inv())
 
         if self.p.print_ETA:
-            mean_time = (datetime.datetime.now() - self.start_time) / self.t
+            mean_time = (datetime.datetime.now() - self._start_time) / self.t
             print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t)}",
                   end='')
         if self.p.record_logs:
@@ -189,7 +189,7 @@ class BaseModel(ap.Model):
             draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
                       ylabel='price', figsize=template_figsize, vlines=template_vlines)
 
-            draw_plot(plots_data=[self.agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
+            draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
                       title=f'MM inventories with config = {self._config_str}',
                       xlabel='model step', ylabel='inventory', figsize=template_figsize,
                       hlines=[
@@ -201,21 +201,21 @@ class BaseModel(ap.Model):
                       vlines=template_vlines,
                       multyplot=True)
 
-            draw_plot(plots_data=[len(self.panic_cases[i]) for i in range(self.p.steps + 1)],
+            draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
                       title=f'count of MMs in panic with config = {self._config_str}',
                       xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
                       vlines=template_vlines)
 
-            draw_plot(plots_data=self.market_volume_money,
+            draw_plot(plots_data=self._market_volume_money,
                       title=f'market volume in money with config = {self._config_str}',
                       xlabel='model step', ylabel='market volume', figsize=template_figsize,
                       vlines=template_vlines)
-            draw_plot(plots_data=self.market_volume_product,
+            draw_plot(plots_data=self._market_volume_product,
                       title=f'market volume in product with config = {self._config_str}',
                       xlabel='model step', ylabel='market volume', figsize=template_figsize,
                       vlines=template_vlines)
 
         if self.p.record_logs:
-            self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time)}")
+            self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
             self.__log_file.flush()
             self.__log_file.close()
