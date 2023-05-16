@@ -7,26 +7,43 @@ from Agents.TargetWealthAgent import TargetWealthAgent
 from Agents.ZeroIntelligenceAgent import ZeroIntelligenceAgent
 
 
-AGENT_FROM_STR = {
-    "CommonTraderAgent": CommonTraderAgent,
-    "HamsterAgent": HamsterAgent,
-    "MarketMakerAgent": MarketMakerAgent,
-    "TargetWealthAgent": TargetWealthAgent,
-    "ZeroIntelligenceAgent": ZeroIntelligenceAgent,
+class AgentNames(object):
+    COM_TR = 'CommonTraderAgent'
+    HAM_TR = "HamsterAgent"
+    MM_TR = "MarketMakerAgent"
+    TARG_TR = "TargetWealthAgent"
+    ZERO_INT_TR = "ZeroIntelligenceAgent"
+
+
+class AgentTypes(object):
+    COM_TR = CommonTraderAgent
+    HAM_TR = HamsterAgent
+    MM_TR = MarketMakerAgent
+    TARG_TR = TargetWealthAgent
+    ZERO_INT_TR = ZeroIntelligenceAgent
+
+
+AGENT_NAMES_LIST = [
+    AgentNames.COM_TR,
+    AgentNames.HAM_TR,
+    AgentNames.MM_TR,
+    AgentNames.TARG_TR,
+    AgentNames.ZERO_INT_TR,
+]
+
+AGENT_TYPE_FROM_NAME = {
+    AgentNames.COM_TR: AgentTypes.COM_TR,
+    AgentNames.HAM_TR: AgentTypes.HAM_TR,
+    AgentNames.MM_TR: AgentTypes.MM_TR,
+    AgentNames.TARG_TR: AgentTypes.TARG_TR,
+    AgentNames.ZERO_INT_TR: AgentTypes.ZERO_INT_TR,
 }
 
-AGENT_NAMES_LIST = sorted([
-    "CommonTraderAgent",
-    "HamsterAgent",
-    "MarketMakerAgent",
-    "TargetWealthAgent",
-    "ZeroIntelligenceAgent",
-])
 
-
-class AGENT_NAMES(Enum):
-    COMMON = "CommonTraderAgent"
-    HAMSTER = "HamsterAgent"
-    MARKET_MAKER = "MarketMakerAgent"
-    TARGET_WEALTH = "TargetWealthAgent"
-    ZERO_INT = "ZeroIntelligenceAgent"
+AGENT_NAME_FROM_TYPE = {
+    AgentTypes.COM_TR: AgentNames.COM_TR,
+    AgentTypes.HAM_TR: AgentNames.HAM_TR,
+    AgentTypes.MM_TR: AgentNames.MM_TR,
+    AgentTypes.TARG_TR: AgentNames.TARG_TR,
+    AgentTypes.ZERO_INT_TR: AgentNames.ZERO_INT_TR,
+}

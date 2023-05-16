@@ -18,6 +18,9 @@ class BaseAgent(ap.Agent):
     def make_decision(self):
         raise NotImplementedError
 
+    def set_name(self, name):
+        self._name = name
+
     def change_balance(self, d_money, d_invent):
         self._money += d_money
         self._inventory += d_invent
@@ -32,3 +35,6 @@ class BaseAgent(ap.Agent):
 
     def close_deal(self, quantity, op_type):
         pass
+
+    def get_inv(self):
+        return self._inventory

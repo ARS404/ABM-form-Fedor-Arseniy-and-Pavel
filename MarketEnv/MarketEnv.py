@@ -1,6 +1,8 @@
 from .OrderBook import OrderBook
 from .MarketHistory import MarketHistory
 
+from utils.AgentMapping import AgentTypes
+
 
 class MarketEnv(object):
     """
@@ -30,19 +32,9 @@ class MarketEnv(object):
         return self.order_book.get_price()
 
     def clear_order_from_trader(self, agent):
-        self.order_book.sell_data[agent] = 10 * [None]
-        self.order_book.buy_data[agent] = 10 * [None]
-
-
-def main():
-    # TODO: rewrite tests
-    m_env = MarketEnv()
-    for i in range(4, 6):
-        m_env.add_order((i**4 + 234) / (i**3 + 54), 2 * i, i)
-    for i in range(3, 5):
-        m_env.add_order((i**5 + 235) / (i**4 + 5), -3 * i, i)
-    m_env.get_price()
-
-
-if __name__ == '__main__':
-    main()
+        if type(agent) == AgentTypes.MM_TR:
+            self.order_book.sell_data[agent] = [None] * agent.model.p.MM_order_live_time
+            self.order_book.buy_data[agent] = [None] * agent.model.p.MM_order_live_time
+        else:
+            self.order_book.sell_data[agent] = [None]
+            self.order_book.buy_data[agent] = [None]

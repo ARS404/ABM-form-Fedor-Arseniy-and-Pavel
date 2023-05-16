@@ -3,7 +3,7 @@ from copy import copy
 import numpy as np
 
 from utils.Constants import OperationTypes
-from utils.AgentMapping import AGENT_FROM_STR
+from utils.AgentMapping import AgentTypes
 
 
 class OrderBookException(Exception):
@@ -46,8 +46,8 @@ class OrderBook(object):
     @staticmethod
     def _clean_book(book):
         for agent in book.keys():
-            # TODO: fix this shit (looks like we have to add live time to each order and rewrite a lot of staff)
-            if type(agent) == AGENT_FROM_STR['MarketMakerAgent']:
+            # TODO: fix this shit (looks like we have to add live time to each order and rewrite a lot of stuff)
+            if type(agent) == AgentTypes.MM_TR:
                 for ind, offer in enumerate(book[agent]):
                     if offer is None:
                         continue
