@@ -1,6 +1,5 @@
 from Agents.BaseAgent import BaseAgent
 from utils.Constants import OperationTypes
-from scipy.stats import uniform
 
 
 class TargetWealthAgent(BaseAgent):
@@ -21,7 +20,7 @@ class TargetWealthAgent(BaseAgent):
         market_env = self.model.market_env
         price_history = market_env.get_history().get_prices()
 
-        order_price = price_history[-1] * uniform.rvs(loc=0.99, scale=0.02)
+        order_price = price_history[-1] * self.model.nprandom.uniform(loc=0.99, scale=0.02)
 
         inventory_value = self._inventory * order_price
         new_inventory_value = (inventory_value + self._money) * self._target_level / (self._target_level + 1)

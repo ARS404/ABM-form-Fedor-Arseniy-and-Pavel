@@ -1,7 +1,5 @@
 import datetime
 import os.path
-import random
-
 
 import agentpy as ap
 
@@ -124,8 +122,8 @@ class BaseModel(ap.Model):
 
         sell_offers = self.market_env.order_book.sellers_at_price(price)
         buy_offers = self.market_env.order_book.buyers_at_price(price)
-        random.shuffle(sell_offers)
-        random.shuffle(buy_offers)
+        self.nprandom.shuffle(sell_offers)
+        self.nprandom.shuffle(buy_offers)
         sell_ind = 0
         buy_ind = 0
 

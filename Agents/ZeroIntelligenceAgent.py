@@ -1,6 +1,4 @@
 from Agents.BaseAgent import BaseAgent
-from scipy.stats import uniform
-from scipy.stats import bernoulli
 
 from utils.Constants import OperationTypes
 
@@ -28,24 +26,24 @@ class ZeroIntelligenceAgent(BaseAgent):
         price_history = market_env.get_history().get_prices()
         if self._inventory < self._min_inventory and self._money < self._min_money or len(price_history) == 0:
             return
-        order_price = price_history[-1] * uniform.rvs(loc=(1 - self._noise), scale=(2 * self._noise))
+        order_price = price_history[-1] * self.model.nprandom.uniform(low=(1 - self._noise), high=(1 + self._noise))
         if order_price == 0:
             return
         if self._inventory < self._min_inventory:
             order_type = OperationTypes.BUY
-            order_size = (self._money ** uniform.rvs(scale=self._risk_level)) / order_price
+            order_size = (self._money ** self.model.nprandom.uniform(high=self._risk_level)) / order_price
             market_env.add_order(order_price, order_size, order_type, self, self.model.t, report=self.p.report)
             return
         if self._money < self._min_money:
             order_type = OperationTypes.SELL
-            order_size = self._inventory ** uniform.rvs(scale=self._risk_level)
+            order_size = self._inventory ** self.model.nprandom.uniform(high=self._risk_level)
             market_env.add_order(order_price, order_size, order_type, self, self.model.t, report=self.p.report)
             return
-        if bernoulli.rvs(p=0.5) == 1:
+        if self.model.nprandom.binomial(n=1, p=0.5) == 1:
             order_type = OperationTypes.BUY
-            order_size = (self._money ** uniform.rvs(scale=self._risk_level)) / order_price
+            order_size = (self._money ** self.model.nprandom.uniform(high=self._risk_level)) / order_price
         else:
             order_type = OperationTypes.SELL
-            order_size = self._inventory ** uniform.rvs(scale=self._risk_level)
+            order_size = self._inventory ** self.model.nprandom.uniform(high=self._risk_level)
         market_env.add_order(order_price, order_size, order_type, self, self.model.t, report=self.p.report)
         return
