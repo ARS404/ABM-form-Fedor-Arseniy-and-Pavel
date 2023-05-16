@@ -23,7 +23,7 @@ class MarketMakerAgent(BaseAgent):
         self._inventory = self.p['MarketMakerAgent_start_inventory']
         self._risk_level = self.p['MarketMakerAgent_risk_level']
 
-    def _init_punic_state(self):
+    def _init_panic_state(self):
         # next line is just debug output
         # print(f"\nHello I`m Market Maker with id {self.id} and I fell into punic state on iteration {self.model.t}\n")
         self.model.record_panic_state(self)
@@ -34,14 +34,14 @@ class MarketMakerAgent(BaseAgent):
     def make_decision(self):
         market_env = self.model.market_env
         if -self._risk_level > self._inventory:
-            self._init_punic_state()
+            self._init_panic_state()
             market_env.add_order(float('inf'), self._risk_level, OperationTypes.BUY, self, self.model.t,
                                  report=self.p.report)
             self._bids += self._risk_level
             return
 
         if self._inventory > self._risk_level:
-            self._init_punic_state()
+            self._init_panic_state()
             market_env.add_order(0, self._risk_level, OperationTypes.SELL, self, self.model.t,
                                  report=self.p.report)
             self._offers += self._risk_level
