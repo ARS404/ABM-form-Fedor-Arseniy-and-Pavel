@@ -29,7 +29,7 @@ class MarketEnv(object):
         self.order_book.clean()
 
     def get_price(self):
-        return self.order_book.get_price()
+        return self.order_book.get_price(self.market_history.deals_prices[-1])
 
     def clear_order_from_trader(self, agent):
         if type(agent) == AgentTypes.MM_TR:

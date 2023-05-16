@@ -85,7 +85,7 @@ class OrderBook(object):
             ret += list(map(lambda y: copy(y), list(y for y in x if y is not None and y.price <= price)))
         return ret
 
-    def get_price(self):
+    def get_price(self, prev_price):
         buys = list()
         sells = list()
         for x in self.buy_data.values():
@@ -133,8 +133,8 @@ class OrderBook(object):
                 if current_quantity >= best_quantity:
                     best_quantity = current_quantity
                     best_price = prices[i]
-        if best_price == float('inf'):
-            best_price = prices[-2]
+        if best_quantity == 0:
+            return prev_price, prev_price, prev_price
         offer_price = 0
         bid_price = prices[-1] + 1
         for i in range(len(buys)):

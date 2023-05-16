@@ -2,6 +2,8 @@ import datetime
 import os.path
 
 import agentpy as ap
+import numpy as np
+from scipy.stats import norm
 
 from MarketEnv.MarketEnv import MarketEnv
 from utils.Constants import OperationTypes
@@ -177,7 +179,7 @@ class BaseModel(ap.Model):
         if self.p.draw_plots:
             prices = self.market_env.market_history.get_prices(limit=None)
             # uncomment next line if you want ot save plots
-            # template_file = os.path.join('run_results', self.p.model_name, str(self.p.steps))
+            template_file = os.path.join('run_results', self.p.model_name, str(self.p.steps))
             template_figsize = (max(self.p.steps // 100, 50), 15)
             template_vlines = None
             if self.p.enable_shock:
@@ -185,7 +187,8 @@ class BaseModel(ap.Model):
                                    for i in range(len(self.p.shock_moments))]
 
             draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
-                      ylabel='price', figsize=template_figsize, vlines=template_vlines)
+                      ylabel='price', figsize=template_figsize, vlines=template_vlines,
+                      file=f'{template_file}_price')
 
             draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
                       title=f'MM inventories with config = {self._config_str}',
@@ -197,23 +200,63 @@ class BaseModel(ap.Model):
                       ],
                       labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
                       vlines=template_vlines,
-                      multyplot=True)
+                      multyplot=True, file=f'{template_file}_MM_inventories')
 
             draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
                       title=f'count of MMs in panic with config = {self._config_str}',
                       xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
-                      vlines=template_vlines)
+                      vlines=template_vlines, file=f'{template_file}_MM_in_panic')
 
             draw_plot(plots_data=self._market_volume_money,
                       title=f'market volume in money with config = {self._config_str}',
-                      xlabel='model step', ylabel='market volume', figsize=template_figsize,
-                      vlines=template_vlines)
+                      xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
+                      file=f'{template_file}_volume_money')
             draw_plot(plots_data=self._market_volume_product,
                       title=f'market volume in product with config = {self._config_str}',
                       xlabel='model step', ylabel='market volume', figsize=template_figsize,
-                      vlines=template_vlines)
+                      vlines=template_vlines, file=f'{template_file}_volume_product')
+            draw_plot(plots_data=self.calculate_vpin(),
+                      title=f'vpin with config = {self._config_str}',
+                      xlabel='model step', ylabel='VPIN', figsize=template_figsize,
+                       file=f'{template_file}_VPIN')
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
             self.__log_file.flush()
             self.__log_file.close()
+
+    def calculate_vpin(self):
+        volumes = self._market_volume_product
+        volume_in_bucket = sum(volumes) / 200
+        price_changes = list()
+        oi = list()
+        prices = self.market_env.market_history.get_prices(limit=None)
+        cur_vol = 0
+        bucket_begin = 0
+        for i in range(len(volumes)):
+            cur_vol += volumes[i]
+            volumes[i] = 0
+            if bucket_begin != i:
+                price_changes.append(prices[i + 1] - prices[i])
+            while cur_vol >= volume_in_bucket:
+                z = 0.5
+                if len(price_changes) >= 2:
+                    price_dev = np.sqrt(np.var(price_changes))
+                    total_price_change = max(prices[bucket_begin:i + 1]) - min(prices[bucket_begin:i + 1])
+                    if price_dev != 0:
+                        z = norm.cdf(total_price_change / price_dev)
+                v_b = volume_in_bucket * z
+                v_s = volume_in_bucket - v_b
+                oi.append(abs(v_b - v_s) / volume_in_bucket)
+                cur_vol = cur_vol - volume_in_bucket
+                price_changes = list()
+                if cur_vol > 0:
+                    bucket_begin = i
+                else:
+                    bucket_begin = i + 1
+        seg_sum = sum(oi[0:50])
+        vpin = list([seg_sum / 50])
+        for i in range(len(oi) - 50):
+            seg_sum += oi[i + 50] - oi[i]
+            vpin.append(seg_sum / 50)
+        return vpin
