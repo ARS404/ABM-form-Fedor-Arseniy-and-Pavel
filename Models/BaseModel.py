@@ -4,18 +4,11 @@ import random
 
 
 import agentpy as ap
-import numpy as np
 
-from matplotlib import pyplot as plt
-from utils.Constants import OperationTypes
 from MarketEnv.MarketEnv import MarketEnv
+from utils.Constants import OperationTypes
 from utils.AgentMapping import AGENT_NAMES_LIST, AGENT_TYPE_FROM_NAME, AgentTypes
-
-
-class BaseModelException(Exception):
-    def __init__(self, message="You have to send some error message"):
-        self.message = message
-        super().__init__(self.message)
+from utils.UtilFunctions import draw_plot
 
 
 class BaseModel(ap.Model):
@@ -69,7 +62,7 @@ class BaseModel(ap.Model):
     # TODO:
     # Add collection of panic state, init of inventory collection, market volume
     def _prepare_statistic_collection(self):
-        self.panic_cases = [[]] * self.p.steps
+        self.panic_cases = [[]] * (self.p.steps + 1)
 
         self.agent_inventories = dict()
 
@@ -119,17 +112,15 @@ class BaseModel(ap.Model):
         if self.t == 0:
             return
         price, offer_price, bid_price = self.market_env.get_price()
-        if self.t == 4000:
-            price *= 1.2
-            bid_price *= 1.2
-            offer_price *= 1.2
+
+        # TODO:
+        # Add shock to config
+
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
         self.market_env.market_history.add_offer_price(offer_price)
         self.market_env.market_history.add_bid_price(bid_price)
-        for i in range(self.agent_types_count[AgentTypes.MM_TR]):
-            mm_inv = self.agents[AgentTypes.MM_TR][i].get_inv()
-            self.add_to_inventory(self.agents[AgentTypes.MM_TR][i], mm_inv)
+
         sell_offers = self.market_env.order_book.sellers_at_price(price)
         buy_offers = self.market_env.order_book.buyers_at_price(price)
         random.shuffle(sell_offers)
@@ -159,7 +150,12 @@ class BaseModel(ap.Model):
             sell_of.trader.make_deal(price, total_quantity, OperationTypes.SELL)
             buy_of.trader.make_deal(price, total_quantity, OperationTypes.BUY)
             self.market_env.market_history.add_deal(buy_of.trader, sell_of.trader, total_quantity)
+
         self.market_env.order_book.clean()
+
+        for agent in self.agents[AgentTypes.MM_TR]:
+            self.add_to_inventory(agent, agent.get_inv())
+
         if self.p.print_ETA:
             mean_time = (datetime.datetime.now() - self.start_time) / self.t
             print(f"\rModel with ID {self.id} complete: {self.t} steps \t ETA = {mean_time * (self.p.steps - self.t)}",
@@ -173,44 +169,29 @@ class BaseModel(ap.Model):
             self.__log_file.flush()
 
     def end(self):
-        if self.p.draw_hists or self.p.draw_plots:
-            prices = self.market_env.market_history.get_prices(limit=None)
-            template_file = os.path.join('run_results', self.p.model_name, str(self.p.steps))
-            if self.p.draw_hists:
-                u = list()
-                for i in range(20, len(prices) - 1):
-                    u.append(np.log(prices[i + 1] / prices[i]))
-                figure1 = plt.figure(1, figsize=(20, 10))
-                plt.hist(u, 500, density=True)
-                plt.savefig(f"{template_file}_price_hist.png")
-                plt.close(figure1)
-                figure2 = plt.figure(1, figsize=(20, 10))
-                plt.hist(u, 500, density=True)
-                plt.yscale('log')
-                plt.savefig(f"{template_file}_price_hist_log.png")
-                plt.close(figure2)
-            if self.p.draw_plots:
-                figure3 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
-                if max(prices) > 10000:
-                    plt.yscale('log')
-                plt.axvline(x=1000, color='r')
-                title = self._config_str
-                plt.title(title)
-                plt.plot(prices, "bo-")
-                plt.savefig(f"{template_file}_price_plot.png")
-                plt.close(figure3)
 
-                figure4 = plt.figure(1, figsize=(max(self.p.steps // 100, 50), 15))
-                title = self._config_str
-                plt.title(title)
-                for agent in self.agents[AgentTypes.MM_TR]:
-                    plt.plot(self.agent_inventories[agent], label=f'inv of {agent.id}')
-                plt.axhline(y=self.p.MarketMakerAgent_risk_level, color='r', ls=':')
-                plt.axhline(y=-1 * self.p.MarketMakerAgent_risk_level, color='r', ls=':')
-                plt.axhline(y=0, color='g', ls=':')
-                plt.legend()
-                plt.savefig(f"{template_file}_mm_inventory.png")
-                plt.close(figure4)
+        # TODO:
+        # add vlines for shock after adding shock to config
+        if self.p.draw_plots:
+            prices = self.market_env.market_history.get_prices(limit=None)
+            # uncomment next line if you want ot save plots
+            # template_file = os.path.join('run_results', self.p.model_name, str(self.p.steps))
+            template_figsize = (max(self.p.steps // 100, 50), 15)
+
+            draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step', ylabel='price',
+                      figsize=template_figsize)
+
+            draw_plot(plots_data=[self.agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
+                      title=f'MM inventories with config = {self._config_str}',
+                      xlabel='model step', ylabel='inventory', figsize=template_figsize,
+                      hlines=[
+                          (self.p.MarketMakerAgent_risk_level, 'r', ':'),
+                          (0, 'g', ':'),
+                          (-self.p.MarketMakerAgent_risk_level, 'r', ':')
+                      ],
+                      labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
+                      multyplot=True)
+
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time)}")
             self.__log_file.flush()

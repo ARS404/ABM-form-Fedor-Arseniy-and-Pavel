@@ -2,7 +2,7 @@
   "ExperimentalSetup": {
     "model_name": "Experiments",
     "seed": 100,
-    "steps": 2000,
+    "steps": 500,
 
     "print_ETA": true,
     "record_logs": true,
