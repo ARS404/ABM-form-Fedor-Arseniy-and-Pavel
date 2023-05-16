@@ -62,7 +62,7 @@ class BaseModel(ap.Model):
     # TODO:
     # Add collection of panic state, init of inventory collection, market volume
     def _prepare_statistic_collection(self):
-        self.panic_cases = [[]] * (self.p.steps + 1)
+        self.panic_cases = [[] for i in range(self.p.steps + 1)]
 
         self.agent_inventories = dict()
 
@@ -113,8 +113,13 @@ class BaseModel(ap.Model):
             return
         price, offer_price, bid_price = self.market_env.get_price()
 
-        # TODO:
-        # Add shock to config
+        if self.p.enable_shock:
+            if self.t in self.p.shock_moments:
+                shock_number = self.p.shock_moments.index(self.t)
+                shock_value = self.p.shock_values[shock_number]
+                price *= (1 + shock_value)
+                offer_price *= (1 + shock_value)
+                bid_price *= (1 + shock_value)
 
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
@@ -169,17 +174,18 @@ class BaseModel(ap.Model):
             self.__log_file.flush()
 
     def end(self):
-
-        # TODO:
-        # add vlines for shock after adding shock to config
         if self.p.draw_plots:
             prices = self.market_env.market_history.get_prices(limit=None)
             # uncomment next line if you want ot save plots
             # template_file = os.path.join('run_results', self.p.model_name, str(self.p.steps))
             template_figsize = (max(self.p.steps // 100, 50), 15)
+            template_vlines = None
+            if self.p.enable_shock:
+                template_vlines = [(self.p.shock_moments[i], 'r' if self.p.shock_values[i] > 0.0 else 'g', ':')
+                                   for i in range(len(self.p.shock_moments))]
 
-            draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step', ylabel='price',
-                      figsize=template_figsize)
+            draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
+                      ylabel='price', figsize=template_figsize, vlines=template_vlines)
 
             draw_plot(plots_data=[self.agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
                       title=f'MM inventories with config = {self._config_str}',
@@ -190,7 +196,13 @@ class BaseModel(ap.Model):
                           (-self.p.MarketMakerAgent_risk_level, 'r', ':')
                       ],
                       labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
+                      vlines=template_vlines,
                       multyplot=True)
+
+            draw_plot(plots_data=[len(self.panic_cases[i]) for i in range(self.p.steps + 1)],
+                      title=f'count of MMs in panic with config = {self._config_str}',
+                      xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
+                      vlines=template_vlines)
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self.start_time)}")

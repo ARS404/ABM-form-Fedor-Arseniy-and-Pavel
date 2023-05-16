@@ -2,7 +2,7 @@
   "ExperimentalSetup": {
     "model_name": "Experiments",
     "seed": 100,
-    "steps": 500,
+    "steps": 2000,
 
     "print_ETA": true,
     "record_logs": true,
@@ -11,8 +11,8 @@
     "report": false,
 
     "enable_shock": true,
-    "shock_moment": 1000,
-    "shock_value": 0.01,
+    "shock_moments": [1000],
+    "shock_values": [0.01],
 
     "start_price": 100,
     "MM_order_live_time": 1,

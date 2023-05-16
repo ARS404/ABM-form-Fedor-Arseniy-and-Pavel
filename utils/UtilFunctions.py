@@ -22,8 +22,8 @@ def draw_plot(plots_data, title, xlabel, ylabel, labels=None, add_x=False, multy
         for hline in hlines:
             plt.axhline(y=hline[0], color=hline[1], ls=hline[2])
     if vlines is not None:
-        for vline in hlines:
-            plt.axvline(y=vline[0], color=vline[1], ls=vline[2])
+        for vline in vlines:
+            plt.axvline(x=vline[0], color=vline[1], ls=vline[2])
 
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
