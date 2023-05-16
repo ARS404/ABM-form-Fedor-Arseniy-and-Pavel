@@ -96,9 +96,9 @@ class OrderBook(object):
         sells.sort(key=lambda x: x.price)
         prices = list()
         for x in self.buy_data.values():
-            prices += [y.price for y in x if y is not None]
+            prices += [y.price for y in x if y is not None and y.price != float('inf')]
         for x in self.sell_data.values():
-            prices += [y.price for y in x if y is not None]
+            prices += [y.price for y in x if y is not None and y.price != 0]
         prices = np.unique(prices)
         prices = list(prices)
         prices.sort()
