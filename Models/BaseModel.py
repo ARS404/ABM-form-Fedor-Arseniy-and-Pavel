@@ -59,15 +59,11 @@ class BaseModel(ap.Model):
                     self.market_env.order_book.sell_data[agent] = [None]
                     self.market_env.order_book.buy_data[agent] = [None]
 
-    # TODO:
-    # Add collection of panic state, init of inventory collection, market volume
     def _prepare_statistic_collection(self):
         self.panic_cases = [[] for i in range(self.p.steps + 1)]
-
-        self.agent_inventories = dict()
-
-        # TODO:
-        # Add other stuff
+        self.agent_inventories = {}
+        self.market_volume_money = []
+        self.market_volume_product = []
 
     def _prepare_logging(self):
         log_file_name = '_'.join(map(lambda x: str(self.agent_names_count[x]), self.used_agent_names))
@@ -132,6 +128,8 @@ class BaseModel(ap.Model):
         random.shuffle(buy_offers)
         sell_ind = 0
         buy_ind = 0
+
+        iter_total_quantity = 0.0
         while sell_ind != len(sell_offers) and buy_ind != len(buy_offers):
             sell_of = sell_offers[sell_ind]
             buy_of = buy_offers[buy_ind]
@@ -152,9 +150,13 @@ class BaseModel(ap.Model):
                 ind = self.t - sell_of.time
                 self.market_env.order_book.sell_data[sell_of.trader][ind] = None
                 sell_ind += 1
+            iter_total_quantity += total_quantity
             sell_of.trader.make_deal(price, total_quantity, OperationTypes.SELL)
             buy_of.trader.make_deal(price, total_quantity, OperationTypes.BUY)
             self.market_env.market_history.add_deal(buy_of.trader, sell_of.trader, total_quantity)
+
+        self.market_volume_money.append(price * iter_total_quantity)
+        self.market_volume_product.append(iter_total_quantity)
 
         self.market_env.order_book.clean()
 
@@ -202,6 +204,15 @@ class BaseModel(ap.Model):
             draw_plot(plots_data=[len(self.panic_cases[i]) for i in range(self.p.steps + 1)],
                       title=f'count of MMs in panic with config = {self._config_str}',
                       xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
+                      vlines=template_vlines)
+
+            draw_plot(plots_data=self.market_volume_money,
+                      title=f'market volume in money with config = {self._config_str}',
+                      xlabel='model step', ylabel='market volume', figsize=template_figsize,
+                      vlines=template_vlines)
+            draw_plot(plots_data=self.market_volume_product,
+                      title=f'market volume in product with config = {self._config_str}',
+                      xlabel='model step', ylabel='market volume', figsize=template_figsize,
                       vlines=template_vlines)
 
         if self.p.record_logs:
