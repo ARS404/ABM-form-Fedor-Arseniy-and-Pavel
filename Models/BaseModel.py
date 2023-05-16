@@ -188,37 +188,33 @@ class BaseModel(ap.Model):
 
             draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
                       ylabel='price', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_price')
+                      file=f'{template_file}_{self.p.enable_shock}.png')
 
-            draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
-                      title=f'MM inventories with config = {self._config_str}',
-                      xlabel='model step', ylabel='inventory', figsize=template_figsize,
-                      hlines=[
-                          (self.p.MarketMakerAgent_risk_level, 'r', ':'),
-                          (0, 'g', ':'),
-                          (-self.p.MarketMakerAgent_risk_level, 'r', ':')
-                      ],
-                      labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
-                      vlines=template_vlines,
-                      multyplot=True, file=f'{template_file}_MM_inventories')
-
-            draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
-                      title=f'count of MMs in panic with config = {self._config_str}',
-                      xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
-                      vlines=template_vlines, file=f'{template_file}_MM_in_panic')
-
-            draw_plot(plots_data=self._market_volume_money,
-                      title=f'market volume in money with config = {self._config_str}',
-                      xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_volume_money')
-            draw_plot(plots_data=self._market_volume_product,
-                      title=f'market volume in product with config = {self._config_str}',
-                      xlabel='model step', ylabel='market volume', figsize=template_figsize,
-                      vlines=template_vlines, file=f'{template_file}_volume_product')
-            draw_plot(plots_data=self.calculate_vpin(),
-                      title=f'vpin with config = {self._config_str}',
-                      xlabel='model step', ylabel='VPIN', figsize=template_figsize,
-                       file=f'{template_file}_VPIN')
+            # draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
+            #           title=f'MM inventories with config = {self._config_str}',
+            #           xlabel='model step', ylabel='inventory', figsize=template_figsize,
+            #           hlines=[
+            #               (self.p.MarketMakerAgent_risk_level, 'r', ':'),
+            #               (0, 'g', ':'),
+            #               (-self.p.MarketMakerAgent_risk_level, 'r', ':')
+            #           ],
+            #           labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
+            #           vlines=template_vlines,
+            #           multyplot=True)
+            #
+            # draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
+            #           title=f'count of MMs in panic with config = {self._config_str}',
+            #           xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
+            #           vlines=template_vlines)
+            #
+            # draw_plot(plots_data=self._market_volume_money,
+            #           title=f'market volume in money with config = {self._config_str}',
+            #           xlabel='model step', ylabel='market volume', figsize=template_figsize,
+            #           vlines=template_vlines)
+            # draw_plot(plots_data=self._market_volume_product,
+            #           title=f'market volume in product with config = {self._config_str}',
+            #           xlabel='model step', ylabel='market volume', figsize=template_figsize,
+            #           vlines=template_vlines)
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
