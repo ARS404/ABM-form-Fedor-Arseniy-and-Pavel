@@ -187,7 +187,7 @@ class BaseModel(ap.Model):
 
             draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
                       ylabel='price', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_{self.p.enable_shock}.png')
+                      file=f'{template_file}_{self.p.enable_shock}_prices.png')
 
             draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
                       title=f'MM inventories with config = {self._config_str}',
@@ -226,6 +226,10 @@ class BaseModel(ap.Model):
                       title=f'linear liquidity with config = {self._config_str}',
                       xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
                       file=f'{template_file}_linear_liquidity')
+            draw_plot(plots_data=self.calculate_volatility(),
+                      title=f'volatility with config = {self._config_str}',
+                      xlabel='model step', ylabel='volatility', figsize=template_figsize,
+                      file=f'{template_file}_volatility')
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
@@ -284,3 +288,13 @@ class BaseModel(ap.Model):
             linear_liquidity.append(abs(prices[i + self.p.statistics_window] - prices[i]))
             linear_liquidity[-1] /= sum(volumes[i:i + self.p.statistics_window])
         return linear_liquidity
+
+    def calculate_volatility(self):
+        prices = self.market_env.market_history.get_prices(limit=None)
+        log_returns = list()
+        for i in range(self.p.steps):
+            log_returns.append(np.log(prices[i + 1]) - np.log(prices[i]))
+        volatility = list()
+        for i in range(self.p.steps - self.p.statistics_window):
+            volatility.append(np.sqrt(np.var(prices[i:i + 50])))
+        return volatility
