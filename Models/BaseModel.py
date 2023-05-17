@@ -51,8 +51,9 @@ class BaseModel(ap.Model):
             self.agents[agent_type].set_name(agent_name)
 
         self.p.MarketMakerAgent_start_inventory = 0.0
-        self.p.MarketMakerAgent_risk_level = sum_inv / self.p.MarketMakerAgent_count
-        self.p.start_price = sum_money / (sum_inv * 4) * 0.99
+        self.p.MarketMakerAgent_risk_level = sum_inv * 3 / self.p.MarketMakerAgent_count
+        sum_inv += cnt * 2 * self.p.MarketMakerAgent_risk_level
+        self.p.start_price = sum_money / sum_inv
         agent_name = AgentNames.MM_TR
         try:
             cnt = self.p.__getattr__(f"{agent_name}_count")
@@ -216,9 +217,10 @@ class BaseModel(ap.Model):
                                    for i in range(len(self.p.shock_moments))]
 
             log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
-            draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
-                      ylabel='price', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png')
+            if sum([len(self._panic_cases[i]) for i in range(1000, 1500)]) / 500 > 0.2 and max([len(self._panic_cases[i]) for i in range(0, 999)]) < 2:
+                draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
+                          ylabel='price', figsize=template_figsize, vlines=template_vlines,
+                          file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png')
 
             # draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
             #           title=f'MM inventories with config = {self._config_str}',
@@ -236,7 +238,7 @@ class BaseModel(ap.Model):
             #           title=f'count of MMs in panic with config = {self._config_str}',
             #           xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
             #           vlines=template_vlines, file=f'{template_file}_MM_in_panic')
-            #
+            # print(sum([len(self._panic_cases[i]) for i in range(self.p.steps + 1)]) / self.p.steps)
             # draw_plot(plots_data=self._market_volume_money,
             #           title=f'market volume in money with config = {self._config_str}',
             #           xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
