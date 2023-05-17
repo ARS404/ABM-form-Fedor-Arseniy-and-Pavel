@@ -10,7 +10,7 @@
     "draw_plots": true,
     "report": false,
 
-    "enable_shock": true,
+    "enable_shock": false,
     "shock_moments": [1000],
     "shock_values": [0.05],
 
@@ -18,9 +18,9 @@
     "MM_order_live_time": 5,
     "statistics_window": 50,
 
-    "HamsterAgent_count": 5,
-    "ZeroIntelligenceAgent_count": 5,
-    "CommonTraderAgent_count": 5,
+    "HamsterAgent_count": 4,
+    "ZeroIntelligenceAgent_count": 4,
+    "CommonTraderAgent_count": 4,
     "MarketMakerAgent_count": 3,
 
     "HamsterAgent_start_money": 10000.0,
@@ -43,6 +43,6 @@
     "CommonTraderAgent_price_variance": 0.1,
 
     "MarketMakerAgent_start_inventory": 0.0,
-    "MarketMakerAgent_risk_level": 500.0
+    "MarketMakerAgent_risk_level": 4.0
 }
 }

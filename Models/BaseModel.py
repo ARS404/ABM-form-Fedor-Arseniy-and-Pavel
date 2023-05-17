@@ -187,7 +187,7 @@ class BaseModel(ap.Model):
 
             draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
                       ylabel='price', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_price')
+                      file=f'{template_file}_{self.p.enable_shock}.png')
 
             draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
                       title=f'MM inventories with config = {self._config_str}',
