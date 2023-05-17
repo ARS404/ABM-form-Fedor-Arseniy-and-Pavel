@@ -130,7 +130,9 @@ class OrderBook(object):
                 best_quantity = current_quantity
                 best_price = prices[i]
             else:
-                if current_quantity >= best_quantity:
+                if current_quantity == best_quantity and abs(best_price - prev_price) > abs(prices[i] - prev_price):
+                    best_price = prices[i]
+                if current_quantity > best_quantity:
                     best_quantity = current_quantity
                     best_price = prices[i]
         if best_quantity == 0:

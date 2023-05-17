@@ -7,7 +7,7 @@ from scipy.stats import norm
 
 from MarketEnv.MarketEnv import MarketEnv
 from utils.Constants import OperationTypes
-from utils.AgentMapping import AGENT_NAMES_LIST, AGENT_TYPE_FROM_NAME, AgentTypes
+from utils.AgentMapping import AGENT_NAMES_LIST, AGENT_TYPE_FROM_NAME, AgentTypes, AgentNames
 from utils.UtilFunctions import draw_plot
 
 
@@ -26,13 +26,20 @@ class BaseModel(ap.Model):
         self._agent_names_count = dict()
         self._agent_types_count = dict()
 
+        sum_inv = 0.0
+        sum_money = 0.0
+
         for agent_name in AGENT_NAMES_LIST:
+            if agent_name == AgentNames.MM_TR:
+                continue
             try:
                 cnt = self.p.__getattr__(f"{agent_name}_count")
             except AttributeError:
                 continue
             if cnt == 0:
                 continue
+            sum_inv += cnt * self.p.__getattr__(f"{agent_name}_start_inventory")
+            sum_money += cnt * self.p.__getattr__(f"{agent_name}_start_money")
             agent_type = AGENT_TYPE_FROM_NAME[agent_name]
 
             self._used_agent_names.append(agent_name)
@@ -43,6 +50,25 @@ class BaseModel(ap.Model):
             self.agents[agent_type] = ap.AgentList(self, cnt, agent_type)
             self.agents[agent_type].set_name(agent_name)
 
+        self.p.MarketMakerAgent_start_inventory = 0.0
+        self.p.MarketMakerAgent_risk_level = sum_inv / self.p.MarketMakerAgent_count
+        self.p.start_price = sum_money / (sum_inv * 4) * 0.99
+        agent_name = AgentNames.MM_TR
+        try:
+            cnt = self.p.__getattr__(f"{agent_name}_count")
+        except AttributeError:
+            return
+        if cnt == 0:
+            return
+        agent_type = AGENT_TYPE_FROM_NAME[agent_name]
+
+        self._used_agent_names.append(agent_name)
+        self._used_agent_types.append(agent_type)
+        self._agent_names_count[agent_name] = cnt
+        self._agent_types_count[agent_type] = cnt
+
+        self.agents[agent_type] = ap.AgentList(self, cnt, agent_type)
+        self.agents[agent_type].set_name(agent_name)
     def _prepare_market_env(self):
         self.market_env = MarketEnv()
 
@@ -90,6 +116,10 @@ class BaseModel(ap.Model):
         self._agent_inventories[agent].append(value)
 
     def setup(self):
+        if not isinstance(self.p.shock_moments, list):
+            self.p.shock_moments = [self.p.shock_moments]
+        if not isinstance(self.p.shock_values, list):
+            self.p.shock_values = [self.p.shock_values]
         self._start_time = datetime.datetime.now()
         self._prepare_agents()
         self._prepare_market_env()
@@ -185,51 +215,52 @@ class BaseModel(ap.Model):
                 template_vlines = [(self.p.shock_moments[i], 'r' if self.p.shock_values[i] > 0.0 else 'g', ':')
                                    for i in range(len(self.p.shock_moments))]
 
+            log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
             draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
                       ylabel='price', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_{self.p.enable_shock}_prices.png')
+                      file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png')
 
-            draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
-                      title=f'MM inventories with config = {self._config_str}',
-                      xlabel='model step', ylabel='inventory', figsize=template_figsize,
-                      hlines=[
-                          (self.p.MarketMakerAgent_risk_level, 'r', ':'),
-                          (0, 'g', ':'),
-                          (-self.p.MarketMakerAgent_risk_level, 'r', ':')
-                      ],
-                      labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
-                      vlines=template_vlines,
-                      multyplot=True, file=f'{template_file}_MM_inventories')
-
-            draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
-                      title=f'count of MMs in panic with config = {self._config_str}',
-                      xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
-                      vlines=template_vlines, file=f'{template_file}_MM_in_panic')
-
-            draw_plot(plots_data=self._market_volume_money,
-                      title=f'market volume in money with config = {self._config_str}',
-                      xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_volume_money')
-            draw_plot(plots_data=self._market_volume_product,
-                      title=f'market volume in product with config = {self._config_str}',
-                      xlabel='model step', ylabel='market volume', figsize=template_figsize,
-                      vlines=template_vlines, file=f'{template_file}_volume_product')
-            draw_plot(plots_data=self.calculate_vpin(),
-                      title=f'vpin with config = {self._config_str}',
-                      xlabel='model step', ylabel='VPIN', figsize=template_figsize,
-                       file=f'{template_file}_VPIN', hlines=[(0, 'black', '-'), (1, 'black', '-')])
-            draw_plot(plots_data=self.calculate_log_liquidity(),
-                      title=f'log liquidity with config = {self._config_str}',
-                      xlabel='model step', ylabel='log liquidity', figsize=template_figsize,
-                      file=f'{template_file}_log_liquidity')
-            draw_plot(plots_data=self.calculate_linear_liquidity(),
-                      title=f'linear liquidity with config = {self._config_str}',
-                      xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
-                      file=f'{template_file}_linear_liquidity')
-            draw_plot(plots_data=self.calculate_volatility(),
-                      title=f'volatility with config = {self._config_str}',
-                      xlabel='model step', ylabel='volatility', figsize=template_figsize,
-                      file=f'{template_file}_volatility')
+            # draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
+            #           title=f'MM inventories with config = {self._config_str}',
+            #           xlabel='model step', ylabel='inventory', figsize=template_figsize,
+            #           hlines=[
+            #               (self.p.MarketMakerAgent_risk_level, 'r', ':'),
+            #               (0, 'g', ':'),
+            #               (-self.p.MarketMakerAgent_risk_level, 'r', ':')
+            #           ],
+            #           labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
+            #           vlines=template_vlines,
+            #           multyplot=True, file=f'{template_file}_MM_inventories')
+            #
+            # draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
+            #           title=f'count of MMs in panic with config = {self._config_str}',
+            #           xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
+            #           vlines=template_vlines, file=f'{template_file}_MM_in_panic')
+            #
+            # draw_plot(plots_data=self._market_volume_money,
+            #           title=f'market volume in money with config = {self._config_str}',
+            #           xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
+            #           file=f'{template_file}_volume_money')
+            # draw_plot(plots_data=self._market_volume_product,
+            #           title=f'market volume in product with config = {self._config_str}',
+            #           xlabel='model step', ylabel='market volume', figsize=template_figsize,
+            #           vlines=template_vlines, file=f'{template_file}_volume_product')
+            # draw_plot(plots_data=self.calculate_vpin(),
+            #           title=f'vpin with config = {self._config_str}',
+            #           xlabel='model step', ylabel='VPIN', figsize=template_figsize,
+            #            file=f'{template_file}_VPIN', hlines=[(0, 'black', '-'), (1, 'black', '-')])
+            # draw_plot(plots_data=self.calculate_log_liquidity(),
+            #           title=f'log liquidity with config = {self._config_str}',
+            #           xlabel='model step', ylabel='log liquidity', figsize=template_figsize,
+            #           file=f'{template_file}_log_liquidity')
+            # draw_plot(plots_data=self.calculate_linear_liquidity(),
+            #           title=f'linear liquidity with config = {self._config_str}',
+            #           xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
+            #           file=f'{template_file}_linear_liquidity')
+            # draw_plot(plots_data=self.calculate_volatility(),
+            #           title=f'volatility with config = {self._config_str}',
+            #           xlabel='model step', ylabel='volatility', figsize=template_figsize,
+            #           file=f'{template_file}_volatility')
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
@@ -296,5 +327,5 @@ class BaseModel(ap.Model):
             log_returns.append(np.log(prices[i + 1]) - np.log(prices[i]))
         volatility = list()
         for i in range(self.p.steps - self.p.statistics_window):
-            volatility.append(np.sqrt(np.var(prices[i:i + 50])))
+            volatility.append(np.sqrt(np.var(prices[i:i + self.p.statistics_window])))
         return volatility
