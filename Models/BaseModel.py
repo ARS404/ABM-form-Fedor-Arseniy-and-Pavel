@@ -109,13 +109,12 @@ class BaseModel(ap.Model):
             return
         price, offer_price, bid_price = self.market_env.get_price()
 
-        if self.p.enable_shock:
-            if self.t in self.p.shock_moments:
-                shock_number = self.p.shock_moments.index(self.t)
-                shock_value = self.p.shock_values[shock_number]
-                price *= (1 + shock_value)
-                offer_price *= (1 + shock_value)
-                bid_price *= (1 + shock_value)
+        if self.p.enable_shock and self.t in self.p.shock_moments:
+            shock_number = self.p.shock_moments.index(self.t)
+            shock_value = self.p.shock_values[shock_number]
+            price *= (1 + shock_value)
+            offer_price *= (1 + shock_value)
+            bid_price *= (1 + shock_value)
 
         self.market_env.market_history.start_new_iter()
         self.market_env.market_history.add_deal_price(price)
@@ -218,7 +217,15 @@ class BaseModel(ap.Model):
             draw_plot(plots_data=self.calculate_vpin(),
                       title=f'vpin with config = {self._config_str}',
                       xlabel='model step', ylabel='VPIN', figsize=template_figsize,
-                       file=f'{template_file}_VPIN')
+                       file=f'{template_file}_VPIN', hlines=[(0, 'black', '-'), (1, 'black', '-')])
+            draw_plot(plots_data=self.calculate_log_liquidity(),
+                      title=f'log liquidity with config = {self._config_str}',
+                      xlabel='model step', ylabel='log liquidity', figsize=template_figsize,
+                      file=f'{template_file}_log_liquidity')
+            draw_plot(plots_data=self.calculate_linear_liquidity(),
+                      title=f'linear liquidity with config = {self._config_str}',
+                      xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
+                      file=f'{template_file}_linear_liquidity')
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
@@ -227,7 +234,7 @@ class BaseModel(ap.Model):
 
     def calculate_vpin(self):
         volumes = self._market_volume_product
-        volume_in_bucket = sum(volumes) / 200
+        volume_in_bucket = sum(volumes) / (self.p.statistics_window * 4)
         price_changes = list()
         oi = list()
         prices = self.market_env.market_history.get_prices(limit=None)
@@ -235,14 +242,13 @@ class BaseModel(ap.Model):
         bucket_begin = 0
         for i in range(len(volumes)):
             cur_vol += volumes[i]
-            volumes[i] = 0
-            if bucket_begin != i:
+            if cur_vol < volume_in_bucket:
                 price_changes.append(prices[i + 1] - prices[i])
             while cur_vol >= volume_in_bucket:
                 z = 0.5
                 if len(price_changes) >= 2:
                     price_dev = np.sqrt(np.var(price_changes))
-                    total_price_change = max(prices[bucket_begin:i + 1]) - min(prices[bucket_begin:i + 1])
+                    total_price_change = prices[i + 1] - prices[bucket_begin]
                     if price_dev != 0:
                         z = norm.cdf(total_price_change / price_dev)
                 v_b = volume_in_bucket * z
@@ -254,9 +260,27 @@ class BaseModel(ap.Model):
                     bucket_begin = i
                 else:
                     bucket_begin = i + 1
-        seg_sum = sum(oi[0:50])
-        vpin = list([seg_sum / 50])
-        for i in range(len(oi) - 50):
-            seg_sum += oi[i + 50] - oi[i]
-            vpin.append(seg_sum / 50)
+        seg_sum = sum(oi[0:self.p.statistics_window])
+        vpin = list([seg_sum / self.p.statistics_window])
+        for i in range(len(oi) - self.p.statistics_window):
+            seg_sum += oi[i + self.p.statistics_window] - oi[i]
+            vpin.append(seg_sum / self.p.statistics_window)
         return vpin
+
+    def calculate_log_liquidity(self):
+        prices = self.market_env.market_history.get_prices(limit=None)
+        volumes = self._market_volume_product
+        log_liquidity = list()
+        for i in range(self.p.steps - self.p.statistics_window):
+            log_liquidity.append(abs(np.log(prices[i + self.p.statistics_window]) - np.log(prices[i])))
+            log_liquidity[-1] /= np.log(sum(volumes[i:i + self.p.statistics_window]))
+        return log_liquidity
+
+    def calculate_linear_liquidity(self):
+        prices = self.market_env.market_history.get_prices(limit=None)
+        volumes = self._market_volume_product
+        linear_liquidity = list()
+        for i in range(self.p.steps - self.p.statistics_window):
+            linear_liquidity.append(abs(prices[i + self.p.statistics_window] - prices[i]))
+            linear_liquidity[-1] /= sum(volumes[i:i + self.p.statistics_window])
+        return linear_liquidity

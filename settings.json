@@ -2,7 +2,7 @@
   "ExperimentalSetup": {
     "model_name": "Experiments",
     "seed": 100,
-    "steps": 2000,
+    "steps": 5000,
 
     "print_ETA": true,
     "record_logs": true,
@@ -12,34 +12,35 @@
 
     "enable_shock": true,
     "shock_moments": [1000],
-    "shock_values": [0.01],
+    "shock_values": [0.05],
 
     "start_price": 100,
-    "MM_order_live_time": 1,
+    "MM_order_live_time": 5,
+    "statistics_window": 50,
 
     "HamsterAgent_count": 5,
     "ZeroIntelligenceAgent_count": 5,
     "CommonTraderAgent_count": 5,
     "MarketMakerAgent_count": 3,
 
-    "HamsterAgent_start_money": 100000.0,
+    "HamsterAgent_start_money": 10000.0,
     "HamsterAgent_start_inventory": 100.0,
     "HamsterAgent_risk_level": 0.5,
     "HamsterAgent_interpolate_degree": 3,
     "HamsterAgent_history_depth": 5,
 
-    "ZeroIntelligenceAgent_start_money": 100000.0,
+    "ZeroIntelligenceAgent_start_money": 10000.0,
     "ZeroIntelligenceAgent_start_inventory": 100.0,
     "ZeroIntelligenceAgent_risk_level": 0.5,
     "ZeroIntelligenceAgent_min_money": 0.0,
     "ZeroIntelligenceAgent_min_inventory": 0.0,
     "ZeroIntelligenceAgent_noise": 0.01,
 
-    "CommonTraderAgent_start_money": 100000.0,
+    "CommonTraderAgent_start_money": 10000.0,
     "CommonTraderAgent_start_inventory": 100.0,
     "CommonTraderAgent_risk_level": 0.5,
     "CommonTraderAgent_sell_probability": 0.5,
-    "CommonTraderAgent_price_variance": 0.35,
+    "CommonTraderAgent_price_variance": 0.1,
 
     "MarketMakerAgent_start_inventory": 0.0,
     "MarketMakerAgent_risk_level": 500.0

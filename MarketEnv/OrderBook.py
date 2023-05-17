@@ -145,4 +145,6 @@ class OrderBook(object):
             offer_price = sells[i].price
             if sells[i].price > best_price:
                 break
+        bid_price = min(bid_price, best_price)
+        offer_price = max(offer_price, best_price)
         return best_price, offer_price, bid_price
