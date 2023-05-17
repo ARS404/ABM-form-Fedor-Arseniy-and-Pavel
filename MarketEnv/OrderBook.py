@@ -124,19 +124,23 @@ class OrderBook(object):
         best_price = None
         best_quantity = None
         prices.reverse()
+        left_ind, right_ind = None, None
         for i in range(len(prices)):
             current_quantity = min(total_buys_for_price[i], abs(total_sells_for_price[i]))
             if best_quantity is None:
                 best_quantity = current_quantity
-                best_price = prices[i]
+                left_ind = 0
+                right_ind = 0
             else:
-                if current_quantity == best_quantity and abs(best_price - prev_price) > abs(prices[i] - prev_price):
-                    best_price = prices[i]
+                if current_quantity == best_quantity:
+                    right_ind = i
                 if current_quantity > best_quantity:
                     best_quantity = current_quantity
-                    best_price = prices[i]
+                    left_ind = i
+                    right_ind = i
         if best_quantity == 0:
             return prev_price, prev_price, prev_price
+        best_price = prices[(left_ind + right_ind)//2]
         offer_price = 0
         bid_price = prices[-1] + 1
         for i in range(len(buys)):
