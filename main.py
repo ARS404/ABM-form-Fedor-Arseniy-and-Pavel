@@ -29,11 +29,11 @@ def run_experiment(setup_name, v_min, v_max, n_jobs, display=False):
         for agent in AGENT_NAMES_LIST:
             if f"{agent}_count" in init_parameters.keys():
                 sample[f"{agent}_count"] = ap.IntRange(vmin=v_min, vmax=v_max)
-        return ap.Sample(sample, n=(v_max - v_min + 1))
+        return ap.Sample(sample, n=(v_max - v_min + 1), randomize=False)
 
     init_parameters = get_parameters(setup_name)
     samples = prepare_samples()
-    experiment = ap.Experiment(BaseModel, sample=samples, iterations=1)
+    experiment = ap.Experiment(BaseModel, sample=samples, iterations=1, randomize=False)
     experiment.run(n_jobs=n_jobs, display=display)
     print(f"\nFinish experiment run with setup {setup_name}")
 
