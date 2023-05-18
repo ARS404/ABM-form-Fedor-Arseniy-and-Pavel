@@ -51,9 +51,9 @@ class BaseModel(ap.Model):
             self.agents[agent_type].set_name(agent_name)
 
         self.p.MarketMakerAgent_start_inventory = 0.0
-        self.p.MarketMakerAgent_risk_level = sum_inv * 3 / self.p.MarketMakerAgent_count
-        sum_inv += cnt * 2 * self.p.MarketMakerAgent_risk_level
-        self.p.start_price = sum_money / sum_inv
+        self.p.MarketMakerAgent_risk_level = sum_inv * self.p.inventory_fraction / self.p.MarketMakerAgent_count
+        self.p.start_price = sum_money / sum_inv * self.p.start_price_coefficient
+        sum_inv += self.p.MarketMakerAgent_count * 2 * self.p.MarketMakerAgent_risk_level
         agent_name = AgentNames.MM_TR
         try:
             cnt = self.p.__getattr__(f"{agent_name}_count")
@@ -126,7 +126,6 @@ class BaseModel(ap.Model):
         self._prepare_market_env()
         self._prepare_logging()
         self._prepare_statistic_collection()
-
         self._config_str = ' '.join([f'{agent_name}: {str(self._agent_names_count[agent_name])}'
                                      for agent_name in self._used_agent_names]) + \
                            f' steps: {self.p.steps}'
@@ -217,10 +216,11 @@ class BaseModel(ap.Model):
                                    for i in range(len(self.p.shock_moments))]
 
             log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
-            if sum([len(self._panic_cases[i]) for i in range(1000, 1500)]) / 500 > 0.2 and max([len(self._panic_cases[i]) for i in range(0, 999)]) < 2:
-                draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
-                          ylabel='price', figsize=template_figsize, vlines=template_vlines,
-                          file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png')
+            # if sum([len(self._panic_cases[i]) for i in range(1000, 1500)]) / 500 > 0.3 and\
+            #         max([len(self._panic_cases[i]) for i in range(0, 999)]) < 2 and self.calculate_volatility()[-1] > 4:
+            draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
+                      ylabel='price', figsize=template_figsize, vlines=template_vlines,
+                      file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png')
 
             # draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
             #           title=f'MM inventories with config = {self._config_str}',
@@ -259,7 +259,7 @@ class BaseModel(ap.Model):
             #           title=f'linear liquidity with config = {self._config_str}',
             #           xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
             #           file=f'{template_file}_linear_liquidity')
-            # draw_plot(plots_data=self.calculate_volatility(),
+            # draw_plot(plots_data=np.log(self.calculate_volatility()),
             #           title=f'volatility with config = {self._config_str}',
             #           xlabel='model step', ylabel='volatility', figsize=template_figsize,
             #           file=f'{template_file}_volatility')
