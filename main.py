@@ -7,6 +7,7 @@ import agentpy as ap
 
 from Models.BaseModel import BaseModel
 from utils.AgentMapping import AGENT_NAMES_LIST
+from utils.AgentMapping import AgentNames
 
 
 def get_parameters(setup_name):
@@ -34,7 +35,7 @@ def run_experiment(setup_name, v_min, v_max, n_jobs, display=False):
     init_parameters = get_parameters(setup_name)
     samples = prepare_samples()
     experiment = ap.Experiment(BaseModel, sample=samples, iterations=1, randomize=False)
-    experiment.run(n_jobs=n_jobs, display=display)
+    experiment.run(n_jobs=n_jobs, display=False)
     print(f"\nFinish experiment run with setup {setup_name}")
 
 

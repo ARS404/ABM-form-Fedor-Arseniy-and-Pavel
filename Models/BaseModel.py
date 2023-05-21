@@ -215,13 +215,19 @@ class BaseModel(ap.Model):
                 template_vlines = [(self.p.shock_moments[i], 'r' if self.p.shock_values[i] > 0.0 else 'g', ':')
                                    for i in range(len(self.p.shock_moments))]
 
-            log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
-            # if sum([len(self._panic_cases[i]) for i in range(1000, 1500)]) / 500 > 0.3 and\
-            #         max([len(self._panic_cases[i]) for i in range(0, 999)]) < 2 and self.calculate_volatility()[-1] > 4:
-            draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel='model step',
-                      ylabel='price', figsize=template_figsize, vlines=template_vlines,
-                      file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png')
-
+            if max([len(self._panic_cases[i]) for i in range(1000, 1100)]) >= 2 and\
+                    max([len(self._panic_cases[i]) for i in range(0, 999)]) == 0:
+                log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
+                log_path = os.path.join('run_results', 'logs', f"{self.p.CommonTraderAgent_sell_probability}_{log_file_name}.log")
+                with open(log_path, 'w') as f:
+                    f.write(f'volatility = {self.calculate_volatility()}\n'
+                            f'linear_liquidity = {self.calculate_linear_liquidity()}\n'
+                            f'log_liquidity = {self.calculate_log_liquidity()}')
+                    f.flush()
+            # draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel=None,
+            #           ylabel=None, figsize=template_figsize, vlines=template_vlines,
+            #           file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png', logscale=False)
+            #
             # draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
             #           title=f'MM inventories with config = {self._config_str}',
             #           xlabel='model step', ylabel='inventory', figsize=template_figsize,
@@ -235,10 +241,9 @@ class BaseModel(ap.Model):
             #           multyplot=True, file=f'{template_file}_MM_inventories')
             #
             # draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
-            #           title=f'count of MMs in panic with config = {self._config_str}',
-            #           xlabel='model step', ylabel='MMs in panic', figsize=template_figsize,
+            #           title=f'MMs in panic with config = {self._config_str}',
+            #           xlabel=None, ylabel=None, figsize=template_figsize,
             #           vlines=template_vlines, file=f'{template_file}_MM_in_panic')
-            # print(sum([len(self._panic_cases[i]) for i in range(self.p.steps + 1)]) / self.p.steps)
             # draw_plot(plots_data=self._market_volume_money,
             #           title=f'market volume in money with config = {self._config_str}',
             #           xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
@@ -259,10 +264,10 @@ class BaseModel(ap.Model):
             #           title=f'linear liquidity with config = {self._config_str}',
             #           xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
             #           file=f'{template_file}_linear_liquidity')
-            # draw_plot(plots_data=np.log(self.calculate_volatility()),
+            # draw_plot(plots_data=self.calculate_volatility(),
             #           title=f'volatility with config = {self._config_str}',
             #           xlabel='model step', ylabel='volatility', figsize=template_figsize,
-            #           file=f'{template_file}_volatility')
+            #           file=f'{template_file}_volatility', logscale=True)
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
