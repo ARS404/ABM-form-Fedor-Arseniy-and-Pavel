@@ -124,7 +124,8 @@ class BaseModel(ap.Model):
         self._start_time = datetime.datetime.now()
         self._prepare_agents()
         self._prepare_market_env()
-        self._prepare_logging()
+        if self.p.record_logs:
+            self._prepare_logging()
         self._prepare_statistic_collection()
         self._config_str = ' '.join([f'{agent_name}: {str(self._agent_names_count[agent_name])}'
                                      for agent_name in self._used_agent_names]) + \
@@ -218,7 +219,7 @@ class BaseModel(ap.Model):
             if max([len(self._panic_cases[i]) for i in range(1000, 1100)]) >= 2 and\
                     max([len(self._panic_cases[i]) for i in range(0, 999)]) == 0:
                 log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
-                log_path = os.path.join('run_results', 'logs', f"{self.p.CommonTraderAgent_sell_probability}_{log_file_name}.log")
+                log_path = os.path.join('run_results', 'logs', f"{self.p.MM_order_live_time}_{log_file_name}.log")
                 with open(log_path, 'w') as f:
                     f.write(f'volatility = {self.calculate_volatility()}\n'
                             f'linear_liquidity = {self.calculate_linear_liquidity()}\n'

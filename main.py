@@ -27,6 +27,7 @@ def run_setup(setup_name, display=False):
 def run_experiment(setup_name, v_min, v_max, n_jobs, display=False):
     def prepare_samples():
         sample = copy.deepcopy(init_parameters)
+        sample['MM_order_live_time'] = ap.IntRange(vmin=v_min, vmax=v_max)
         for agent in AGENT_NAMES_LIST:
             if f"{agent}_count" in init_parameters.keys():
                 sample[f"{agent}_count"] = ap.IntRange(vmin=v_min, vmax=v_max)
