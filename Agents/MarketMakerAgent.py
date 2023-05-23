@@ -26,6 +26,9 @@ class MarketMakerAgent(BaseAgent):
     def _init_panic_state(self):
         # next line is just debug output
         # print(f"\nHello I`m Market Maker with id {self.id} and I fell into punic state on iteration {self.model.t}\n")
+        if self.model.t < 1000:
+            print("\nI`m in panic to early...")
+            self.model.running = False
         self.model.record_panic_state(self)
         self.model.market_env.clear_order_from_trader(self)
         self._bids = 0

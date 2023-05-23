@@ -29,6 +29,9 @@ class BaseModel(ap.Model):
         sum_inv = 0.0
         sum_money = 0.0
 
+        self.p.HamsterAgent_history_depth = int(min(self.p.HamsterAgent_interpolate_degree + 3,
+                                                    self.p.HamsterAgent_interpolate_degree * 2))
+
         for agent_name in AGENT_NAMES_LIST:
             if agent_name == AgentNames.MM_TR:
                 continue
@@ -138,6 +141,13 @@ class BaseModel(ap.Model):
     def update(self):
         if self.t == 0:
             return
+
+        if self.t == 1101:
+            if max([len(x) for x in self._panic_cases[1000:1101]]) < 2:
+                print("\nNo panic after shock\n")
+                self.running = False
+                return
+
         price, offer_price, bid_price = self.market_env.get_price()
 
         if self.p.enable_shock and self.t in self.p.shock_moments:
@@ -219,11 +229,12 @@ class BaseModel(ap.Model):
             if max([len(self._panic_cases[i]) for i in range(1000, 1100)]) >= 2 and\
                     max([len(self._panic_cases[i]) for i in range(0, 999)]) == 0:
                 log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
-                log_path = os.path.join('run_results', 'logs', f"{self.p.MM_order_live_time}_{log_file_name}.log")
+                log_path = os.path.join('run_results', 'logs', f"{self.p.HamsterAgent_interpolate_degree}_{log_file_name}.log")
                 with open(log_path, 'w') as f:
                     f.write(f'volatility = {self.calculate_volatility()}\n'
                             f'linear_liquidity = {self.calculate_linear_liquidity()}\n'
-                            f'log_liquidity = {self.calculate_log_liquidity()}')
+                            f'log_liquidity = {self.calculate_log_liquidity()}'
+                            f'prices = {prices}')
                     f.flush()
             # draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel=None,
             #           ylabel=None, figsize=template_figsize, vlines=template_vlines,
