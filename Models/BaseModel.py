@@ -32,6 +32,9 @@ class BaseModel(ap.Model):
         sum_inv = 0.0
         sum_money = 0.0
 
+        self.p.HamsterAgent_history_depth = int(min(self.p.HamsterAgent_interpolate_degree + 3,
+                                                    self.p.HamsterAgent_interpolate_degree * 2))
+
         for agent_name in AGENT_NAMES_LIST:
             if agent_name == AgentNames.MM_TR:
                 continue
@@ -141,9 +144,6 @@ class BaseModel(ap.Model):
     def update(self):
         if self.t == 0:
             return
-        # if self.t == 1105 and max([len(self._panic_cases[i]) for i in range(1000, 1100)]) < 2:
-        #     self.running = False
-        #     return
         price, offer_price, bid_price = self.market_env.get_price()
 
         if self.p.enable_shock and self.t in self.p.shock_moments:
