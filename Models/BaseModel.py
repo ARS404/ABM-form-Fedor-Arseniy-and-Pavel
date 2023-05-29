@@ -4,6 +4,8 @@ import os.path
 import agentpy as ap
 import numpy as np
 from scipy.stats import norm
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 from MarketEnv.MarketEnv import MarketEnv
 from utils.Constants import OperationTypes
@@ -25,6 +27,7 @@ class BaseModel(ap.Model):
         self._used_agent_names = []
         self._agent_names_count = dict()
         self._agent_types_count = dict()
+        # self.p.HamsterAgent_history_depth = self.p.HamsterAgent_interpolate_degree + 3
 
         sum_inv = 0.0
         sum_money = 0.0
@@ -138,6 +141,9 @@ class BaseModel(ap.Model):
     def update(self):
         if self.t == 0:
             return
+        # if self.t == 1105 and max([len(self._panic_cases[i]) for i in range(1000, 1100)]) < 2:
+        #     self.running = False
+        #     return
         price, offer_price, bid_price = self.market_env.get_price()
 
         if self.p.enable_shock and self.t in self.p.shock_moments:
@@ -216,59 +222,52 @@ class BaseModel(ap.Model):
                 template_vlines = [(self.p.shock_moments[i], 'r' if self.p.shock_values[i] > 0.0 else 'g', ':')
                                    for i in range(len(self.p.shock_moments))]
 
-            if max([len(self._panic_cases[i]) for i in range(1000, 1100)]) >= 2 and\
-                    max([len(self._panic_cases[i]) for i in range(0, 999)]) == 0:
-                log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
-                log_path = os.path.join('run_results', 'logs', f"{self.p.MM_order_live_time}_{log_file_name}.log")
-                with open(log_path, 'w') as f:
-                    f.write(f'volatility = {self.calculate_volatility()}\n'
-                            f'linear_liquidity = {self.calculate_linear_liquidity()}\n'
-                            f'log_liquidity = {self.calculate_log_liquidity()}')
-                    f.flush()
-            # draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel=None,
-            #           ylabel=None, figsize=template_figsize, vlines=template_vlines,
-            #           file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png', logscale=False)
-            #
-            # draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
-            #           title=f'MM inventories with config = {self._config_str}',
-            #           xlabel='model step', ylabel='inventory', figsize=template_figsize,
-            #           hlines=[
-            #               (self.p.MarketMakerAgent_risk_level, 'r', ':'),
-            #               (0, 'g', ':'),
-            #               (-self.p.MarketMakerAgent_risk_level, 'r', ':')
-            #           ],
-            #           labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
-            #           vlines=template_vlines,
-            #           multyplot=True, file=f'{template_file}_MM_inventories')
-            #
-            # draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
-            #           title=f'MMs in panic with config = {self._config_str}',
-            #           xlabel=None, ylabel=None, figsize=template_figsize,
-            #           vlines=template_vlines, file=f'{template_file}_MM_in_panic')
-            # draw_plot(plots_data=self._market_volume_money,
-            #           title=f'market volume in money with config = {self._config_str}',
-            #           xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
-            #           file=f'{template_file}_volume_money')
-            # draw_plot(plots_data=self._market_volume_product,
-            #           title=f'market volume in product with config = {self._config_str}',
-            #           xlabel='model step', ylabel='market volume', figsize=template_figsize,
-            #           vlines=template_vlines, file=f'{template_file}_volume_product')
-            # draw_plot(plots_data=self.calculate_vpin(),
-            #           title=f'vpin with config = {self._config_str}',
-            #           xlabel='model step', ylabel='VPIN', figsize=template_figsize,
-            #            file=f'{template_file}_VPIN', hlines=[(0, 'black', '-'), (1, 'black', '-')])
-            # draw_plot(plots_data=self.calculate_log_liquidity(),
-            #           title=f'log liquidity with config = {self._config_str}',
-            #           xlabel='model step', ylabel='log liquidity', figsize=template_figsize,
-            #           file=f'{template_file}_log_liquidity')
-            # draw_plot(plots_data=self.calculate_linear_liquidity(),
-            #           title=f'linear liquidity with config = {self._config_str}',
-            #           xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
-            #           file=f'{template_file}_linear_liquidity')
-            # draw_plot(plots_data=self.calculate_volatility(),
-            #           title=f'volatility with config = {self._config_str}',
-            #           xlabel='model step', ylabel='volatility', figsize=template_figsize,
-            #           file=f'{template_file}_volatility', logscale=True)
+            log_file_name = '_'.join(map(lambda x: str(self._agent_names_count[x]), self._used_agent_names))
+
+            draw_plot(plots_data=prices, title=f'prices with config = {self._config_str}', xlabel=None,
+                      ylabel=None, figsize=template_figsize, vlines=template_vlines,
+                      file=f'{template_file}_{self.p.enable_shock}_{log_file_name}_prices.png', logscale=False)
+
+            draw_plot(plots_data=[self._agent_inventories[agent] for agent in self.agents[AgentTypes.MM_TR]],
+                      title=f'MM inventories with config = {self._config_str}',
+                      xlabel='model step', ylabel='inventory', figsize=template_figsize,
+                      hlines=[
+                          (self.p.MarketMakerAgent_risk_level, 'r', ':'),
+                          (0, 'g', ':'),
+                          (-self.p.MarketMakerAgent_risk_level, 'r', ':')
+                      ],
+                      labels=[f'inv of {agent.id}' for agent in self.agents[AgentTypes.MM_TR]],
+                      vlines=template_vlines,
+                      multyplot=True, file=f'{template_file}_MM_inventories')
+
+            draw_plot(plots_data=[len(self._panic_cases[i]) for i in range(self.p.steps + 1)],
+                      title=f'MMs in panic with config = {self._config_str}',
+                      xlabel=None, ylabel=None, figsize=template_figsize,
+                      vlines=template_vlines, file=f'{template_file}_MM_in_panic')
+            draw_plot(plots_data=self._market_volume_money,
+                      title=f'market volume in money with config = {self._config_str}',
+                      xlabel='model step', ylabel='market volume', figsize=template_figsize, vlines=template_vlines,
+                      file=f'{template_file}_volume_money')
+            draw_plot(plots_data=self._market_volume_product,
+                      title=f'market volume in product with config = {self._config_str}',
+                      xlabel='model step', ylabel='market volume', figsize=template_figsize,
+                      vlines=template_vlines, file=f'{template_file}_volume_product')
+            draw_plot(plots_data=self.calculate_vpin(),
+                      title=f'vpin with config = {self._config_str}',
+                      xlabel='model step', ylabel='VPIN', figsize=template_figsize,
+                       file=f'{template_file}_VPIN', hlines=[(0, 'black', '-'), (1, 'black', '-')])
+            draw_plot(plots_data=self.calculate_log_liquidity(),
+                      title=f'log liquidity with config = {self._config_str}',
+                      xlabel='model step', ylabel='log liquidity', figsize=template_figsize,
+                      file=f'{template_file}_log_liquidity')
+            draw_plot(plots_data=self.calculate_linear_liquidity(),
+                      title=f'linear liquidity with config = {self._config_str}',
+                      xlabel='model step', ylabel='linear liquidity', figsize=template_figsize,
+                      file=f'{template_file}_linear_liquidity')
+            draw_plot(plots_data=self.calculate_volatility(),
+                      title=f'volatility with config = {self._config_str}',
+                      xlabel='model step', ylabel='volatility', figsize=template_figsize,
+                      file=f'{template_file}_volatility', logscale=False)
 
         if self.p.record_logs:
             self.__log_file.write(f"\nModel successfully finished at {(datetime.datetime.now() - self._start_time)}")
@@ -335,5 +334,5 @@ class BaseModel(ap.Model):
             log_returns.append(np.log(prices[i + 1]) - np.log(prices[i]))
         volatility = list()
         for i in range(self.p.steps - self.p.statistics_window):
-            volatility.append(np.sqrt(np.var(prices[i:i + self.p.statistics_window])))
+            volatility.append(np.sqrt(np.var(log_returns[i:i + self.p.statistics_window])))
         return volatility

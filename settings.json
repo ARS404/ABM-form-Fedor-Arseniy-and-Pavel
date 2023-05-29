@@ -161,16 +161,16 @@
     "shock_moments": 1000,
     "shock_values": 0.05,
 
-    "start_price": 100,
-    "MM_order_live_time": 3,
+    "start_price": 40,
+    "MM_order_live_time": 2 ,
     "statistics_window": 50,
-    "inventory_fraction": 3,
+    "inventory_fraction": 1,
     "start_price_coefficient": 0.4,
 
-    "HamsterAgent_count": 4,
+    "HamsterAgent_count": 2,
     "ZeroIntelligenceAgent_count": 3,
-    "CommonTraderAgent_count": 7,
-    "MarketMakerAgent_count": 2,
+    "CommonTraderAgent_count": 8,
+    "MarketMakerAgent_count": 8,
 
     "HamsterAgent_start_money": 100.0,
     "HamsterAgent_start_inventory": 1.0,
@@ -189,7 +189,7 @@
     "CommonTraderAgent_start_inventory": 1.0,
     "CommonTraderAgent_risk_level": 0.5,
     "CommonTraderAgent_sell_probability": 0.5,
-    "CommonTraderAgent_price_variance": 0.5,
+    "CommonTraderAgent_price_variance": 0.1,
 
     "MarketMakerAgent_start_inventory": 0.0,
     "MarketMakerAgent_risk_level": 6.5

@@ -24,8 +24,6 @@ class MarketMakerAgent(BaseAgent):
         self._risk_level = self.p['MarketMakerAgent_risk_level']
 
     def _init_panic_state(self):
-        # next line is just debug output
-        # print(f"\nHello I`m Market Maker with id {self.id} and I fell into punic state on iteration {self.model.t}\n")
         self.model.record_panic_state(self)
         self.model.market_env.clear_order_from_trader(self)
         self._bids = 0
@@ -58,8 +56,6 @@ class MarketMakerAgent(BaseAgent):
         offset = (best_offer - best_bid) * f(self._inventory / self._risk_level)
         bid_price = best_bid - offset
         offer_price = best_offer - offset
-        # bid_size = min(bid_size, 2e8 / bid_price)
-        # offer_size = min(offer_size, 2e8 / offer_price)
 
         if bid_price > 0:
             market_env.add_order(bid_price, bid_size, OperationTypes.BUY, self, self.model.t, report=self.p.report)
